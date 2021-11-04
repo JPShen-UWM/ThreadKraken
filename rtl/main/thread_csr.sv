@@ -8,7 +8,7 @@
 
 `include "header.svh"
 
-module thread_crs #( parameter THRD_ID = 0 )
+module thread_crs #( parameter TRD_ID = 0 )
 (
     input               clk,
     input               rst_n,
@@ -18,8 +18,8 @@ module thread_crs #( parameter THRD_ID = 0 )
     input               slp,        // Sleep this thread
     input               kill,       // Kill this thread
     input               wake,       // Wake up this thread
-    input [2:0]         obj_thrd,   // Global objective thread
-    input [2:0]         act_thrd,   // Global action thread
+    input [2:0]         obj_trd,    // Global objective thread
+    input [2:0]         act_trd,    // Global action thread
     input [31:0]        nxt_pc,     // Next PC
     input               pc_wr,      // Write next PC
 
@@ -37,18 +37,18 @@ module thread_crs #( parameter THRD_ID = 0 )
             running <= 1'b0;
             par_trd <= 3'b0;
         end
-        else if (init & obj_thrd == THRD_ID) begin
+        else if (init & obj_trd == TRD_ID) begin
             valid <= 1'b1;
             running <= 1'b1;
             par_trd <= act_thrd;
         end
-        else if (slp & obj_thrd == THRD_ID & act_thrd == par_trd) begin
+        else if (slp & obj_trd == TRD_ID & act_thrd == par_trd) begin
             running <= 1'b0;
         end
-        else if (wake & obj_thrd == THRD_ID & valid) begin
+        else if (wake & obj_trd == TRD_ID & valid) begin
             running <= 1'b1;
         end
-        else if (kill & obj_thrd == THRD_ID & valid & act_thrd == par_trd) begin
+        else if (kill & obj_trd == TRD_ID & valid & act_thrd == par_trd) begin
             valid <= 1'b0;
             running <= 1'b0;
         end
@@ -67,11 +67,9 @@ module thread_crs #( parameter THRD_ID = 0 )
     // Error detector
     always_comb begin
         error = 0;
-        if (running & !valid) 
+        if (obj_trd == TRD_ID & act_thrd != par_trd & (slp|kill)) 
             error = 1;
-        if (obj_thrd == THRD_ID & act_thrd != par_trd & (slp|kill)) 
-            error = 1;
-        if (init & obj_thrd == THRD_ID & valid) 
+        if (init & obj_trd == TRD_ID & valid) 
             error = 1;
     end
 endmodule
