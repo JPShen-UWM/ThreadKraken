@@ -40,15 +40,15 @@ module thread_crs #( parameter TRD_ID = 0 )
         else if (init & obj_trd == TRD_ID) begin
             valid <= 1'b1;
             running <= 1'b1;
-            par_trd <= act_thrd;
+            par_trd <= act_trd;
         end
-        else if (slp & obj_trd == TRD_ID & act_thrd == par_trd) begin
+        else if (slp & obj_trd == TRD_ID & act_trd == par_trd) begin
             running <= 1'b0;
         end
         else if (wake & obj_trd == TRD_ID & valid) begin
             running <= 1'b1;
         end
-        else if (kill & obj_trd == TRD_ID & valid & act_thrd == par_trd) begin
+        else if (kill & obj_trd == TRD_ID & valid & act_trd == par_trd) begin
             valid <= 1'b0;
             running <= 1'b0;
         end
@@ -67,7 +67,7 @@ module thread_crs #( parameter TRD_ID = 0 )
     // Error detector
     always_comb begin
         error = 0;
-        if (obj_trd == TRD_ID & act_thrd != par_trd & (slp|kill)) 
+        if (obj_trd == TRD_ID & act_trd != par_trd & (slp|kill)) 
             error = 1;
         if (init & obj_trd == TRD_ID & valid) 
             error = 1;

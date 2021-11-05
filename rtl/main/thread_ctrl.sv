@@ -229,7 +229,7 @@ module thread_ctrl(
 
 
     // 8 thread csr
-    thread_crs #( parameter TRD_ID = 0 )
+    thread_csr #(0)
     CSR_0
     (
         .clk        (clk),
@@ -250,7 +250,7 @@ module thread_ctrl(
         .error      (csr_error[0])
     );
 
-    thread_crs #( parameter TRD_ID = 1 )
+    thread_csr #(1)
     CSR_1
     (
         .clk        (clk),
@@ -271,7 +271,7 @@ module thread_ctrl(
         .error      (csr_error[1])
     );
 
-    thread_crs #( parameter TRD_ID = 2 )
+    thread_csr #(2)
     CSR_2
     (
         .clk        (clk),
@@ -292,7 +292,7 @@ module thread_ctrl(
         .error      (csr_error[2])
     );
 
-    thread_crs #( parameter TRD_ID = 3 )
+    thread_csr #(3)
     CSR_3
     (
         .clk        (clk),
@@ -313,7 +313,7 @@ module thread_ctrl(
         .error      (csr_error[3])
     );
 
-    thread_crs #( parameter TRD_ID = 4 )
+    thread_csr #(4)
     CSR_4
     (
         .clk        (clk),
@@ -334,7 +334,7 @@ module thread_ctrl(
         .error      (csr_error[4])
     );
 
-    thread_crs #( parameter TRD_ID = 5 )
+    thread_csr #(5)
     CSR_5
     (
         .clk        (clk),
@@ -355,7 +355,7 @@ module thread_ctrl(
         .error      (csr_error[5])
     );
 
-    thread_crs #( parameter TRD_ID = 6 )
+    thread_csr #(6)
     CSR_6
     (
         .clk        (clk),
@@ -376,7 +376,7 @@ module thread_ctrl(
         .error      (csr_error[6])
     );
 
-    thread_crs #( parameter TRD_ID = 7 )
+    thread_csr #(7)
     CSR_7
     (
         .clk        (clk),
