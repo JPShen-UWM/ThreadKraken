@@ -6,11 +6,26 @@ import sys
 import collections
 import re
 
+#arithmetic extension s to n bit
+# s = 0b xxx
+def a_ext(s, n):
+  s = s[2:]
+  if len(s) < n:
+    return s[0]*(n-len(s)) + s
+  else:
+    return s
+#logic extension s to n bit
+def l_ext(s, n):
+  s = s[2:]
+  if len(s) < n:
+    return '0'*(n-len(s)) + s
+  else:
+    return s
+
 class Assembler:
 
     # add
     # ADD rd, ra, rb | rd = ra + rb
-    # 
     def _add(cmd):
       OPCODE = '1101111'
 
@@ -20,7 +35,20 @@ class Assembler:
         raise Exception('Unrecognized arguments...')
       rd,ra,rb = bin(int(rd[1:])),bin(int(ra[1:])),bin(int(rb[1:]))
       
-      return rd + ra + rb + '0'*9 + OPCODE + '0'
+      return l_ext(rd,5) + l_ext(ra,5) + l_ext(rb,5) + '0'*9 + OPCODE + '0'
+
+    # not
+    # NOT rd, ra    |    rd = !ra
+    def _not(cmd):
+      OPCODE = '0001111'
+
+      args = re.split(',| ', cmd)
+      [_, rd, ra] = [_ for _ in args if len(_) > 0]
+      if rd[0] != 'r' or ra[0] != 'r':
+        raise Exception('Unrecognized arguments...')
+      rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
+      
+      return l_ext(rd,5) + l_ext(ra,5) + '0'* 14 + OPCODE + '0'
 
     # addi
     # ADDI rd, ra, imm rd = ra + imm
@@ -34,7 +62,7 @@ class Assembler:
 
     func_map = {
       'add': _add, 
-      # 'not': _not,
+      'not': _not,
       # 'and': _and, 
       # 'or': _or,
       # 'xor': _xor, 
