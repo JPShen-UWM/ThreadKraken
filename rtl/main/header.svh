@@ -1,3 +1,11 @@
+/*
+ * Module name: header
+ * Engineer: Jianping Shen
+ * Description: header file for the project, define global variable
+ * Dependency:
+ * Status: testing
+ */
+
 parameter threads   = 8;
 
 // Operation code
@@ -21,3 +29,7 @@ parameter SHRT      =   3'b010;
 parameter SHAR      =   3'b100;
 parameter LBI       =   3'b001;
 parameter SLB       =   3'b010;
+
+// PC Address
+parameter START_PC  =   32'h0001_1000;
+parameter HANDLER   =   32'h0001_0000;
