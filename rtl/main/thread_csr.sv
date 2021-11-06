@@ -8,7 +8,7 @@
 
 `include "header.svh"
 
-module thread_crs #( parameter TRD_ID = 0 )
+module thread_csr #( parameter TRD_ID = 0 )
 (
     input               clk,
     input               rst_n,
@@ -32,7 +32,7 @@ module thread_crs #( parameter TRD_ID = 0 )
 
     // Status register
     always_ff @(posedge clk, negedge rst_n) begin
-        if(rst_n) begin
+        if(!rst_n) begin
             valid <= 1'b0;
             running <= 1'b0;
             par_trd <= 3'b0;
@@ -56,8 +56,11 @@ module thread_crs #( parameter TRD_ID = 0 )
 
     // PC register
     always_ff @(posedge clk, negedge rst_n) begin
-        if(rst_n) begin 
+        if(!rst_n) begin 
             cur_pc <= START_PC;
+        end
+        else if(init) begin
+            cur_pc <= init_pc;
         end
         else if(pc_wr) begin
             cur_pc <= nxt_pc;

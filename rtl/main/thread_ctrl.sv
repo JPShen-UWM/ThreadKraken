@@ -3,7 +3,7 @@
  * Engineer: Jianping Shen
  * Description: Main thread controler in IF. Store the status of each thread, determine next thread, create, kill or sleep a thread.
  * Dependency: thread_csr
- * Status: developing
+ * Status: Done
  */
 
 `include "header.svh"
@@ -18,9 +18,18 @@ module thread_ctrl(
     input               wake        ,   // wake up the objective thread
     input               init_trd    ,   // Init a new thread
     input [2:0]         act_trd     ,   // Act thread that sending the commend
-    input [2:0]         obj_trd     ,   // Objective thread that being kill, sleep, or wake
+    input [2:0]         obj_trd_in  ,   // Objective thread that being kill, sleep, or wake
     input               stall       ,   // Stall any action
     input [31:0]        init_pc     ,   // Initial pc for a new thread
+    input [7:0]         pc_wr       ,
+    input [31:0]        nxt_pc_0    ,
+    input [31:0]        nxt_pc_1    ,
+    input [31:0]        nxt_pc_2    ,
+    input [31:0]        nxt_pc_3    ,
+    input [31:0]        nxt_pc_4    ,
+    input [31:0]        nxt_pc_5    ,
+    input [31:0]        nxt_pc_6    ,
+    input [31:0]        nxt_pc_7    ,
 
     output logic [2:0]  cur_trd     ,   // Current thread pointing to
     output logic [2:0]  nxt_trd     ,   // Next thread
@@ -32,20 +41,28 @@ module thread_ctrl(
     output logic        invalid_op  ,   // Trying to kill or sleep a thread that is not its child or itself
     output logic        error       ,   // Other unrecoverable error
     output logic        cur_pc      ,   // Current pc
-    output logic [7:0]  child_trd       // Children thread of act_trd
+    output logic [7:0]  child_0     ,   // Children thread of thread 0
+    output logic [7:0]  child_1     ,   // Children thread of thread 1
+    output logic [7:0]  child_2     ,   // Children thread of thread 2
+    output logic [7:0]  child_3     ,   // Children thread of thread 3
+    output logic [7:0]  child_4     ,   // Children thread of thread 4
+    output logic [7:0]  child_5     ,   // Children thread of thread 5
+    output logic [7:0]  child_6     ,   // Children thread of thread 6
+    output logic [7:0]  child_7         // Children thread of thread 7
 );
 
     logic [31:0] cur_pc_0, cur_pc_1, cur_pc_2, cur_pc_3,
                  cur_pc_4, cur_pc_5, cur_pc_6, cur_pc_7;
-    logic [31:0] nxt_pc_0, nxt_pc_1, nxt_pc_2, nxt_pc_3,
-                 nxt_pc_4, nxt_pc_5, nxt_pc_6, nxt_pc_7;
+    // logic [31:0] nxt_pc_0, nxt_pc_1, nxt_pc_2, nxt_pc_3,
+    //              nxt_pc_4, nxt_pc_5, nxt_pc_6, nxt_pc_7;
     logic [7:0] csr_error;
-    logic [7:0] pc_wr;
+    logic [2:0] obj_trd;
     logic init;     // Init a new thread
     logic [2:0] par_trd_0, par_trd_1, par_trd_2, par_trd_3, 
                 par_trd_4, par_trd_5, par_trd_6, par_trd_7;
-    logic [7:0] child_0, child_1, child_2, child_3,
-                child_4, child_5, child_6, child_7;
+    //logic [7:0] child_0, child_1, child_2, child_3,
+    //            child_4, child_5, child_6, child_7;
+    logic [2:0] nxt_new_trd;
 
     assign trd_full = &valid_trd;
     assign trd_of = trd_full;
@@ -121,7 +138,7 @@ module thread_ctrl(
     assign child_7[5] = valid_trd[5] & (par_trd_5 == 7);
     assign child_7[6] = valid_trd[6] & (par_trd_6 == 7);
     assign child_7[7] = valid_trd[7] & (par_trd_7 == 7);
-
+    /*
     always_comb begin
         case(act_trd)
             3'b000: child_trd = child_0;
@@ -134,9 +151,10 @@ module thread_ctrl(
             3'b111: child_trd = child_7;
         endcase
     end
+    */
     // Thread pointer
     always_ff @(posedge clk, negedge rst_n) begin
-        if(rst_n) cur_trd <= 0;
+        if(!rst_n) cur_trd <= 0;
         else cur_trd <= nxt_trd;
     end
 
@@ -228,6 +246,40 @@ module thread_ctrl(
     end
 
 
+    // New Thread pointer
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) new_trd <= 0;
+        else if(init_trd) new_trd <= nxt_new_trd;
+    end
+
+    always_comb begin
+        nxt_new_trd = 0;
+        if(!valid_trd[1]) nxt_new_trd = 1;
+        else if(!valid_trd[2]) nxt_new_trd = 2;
+        else if(!valid_trd[3]) nxt_new_trd = 3;
+        else if(!valid_trd[4]) nxt_new_trd = 4;
+        else if(!valid_trd[5]) nxt_new_trd = 5;
+        else if(!valid_trd[6]) nxt_new_trd = 6;
+        else if(!valid_trd[7]) nxt_new_trd = 7;
+    end
+
+    assign init = init_trd;
+    assign obj_trd = init? new_trd: obj_trd_in;
+    
+    // Current pc
+    always_comb begin
+        cur_pc = HANDLER;
+        case(cur_trd)
+            3'b000: cur_pc = cur_pc_0;
+            3'b001: cur_pc = cur_pc_1;
+            3'b010: cur_pc = cur_pc_2;
+            3'b011: cur_pc = cur_pc_3;
+            3'b100: cur_pc = cur_pc_4;
+            3'b101: cur_pc = cur_pc_5;
+            3'b110: cur_pc = cur_pc_6;
+            3'b111: cur_pc = cur_pc_7;
+        endcase
+    end
     // 8 thread csr
     thread_csr #(0)
     CSR_0
@@ -396,6 +448,6 @@ module thread_ctrl(
         .running    (run_trd[7]),      
         .error      (csr_error[7])
     );
-
+    assign error = trd_full & init;
     assign invalid_op = |csr_error;
 endmodule

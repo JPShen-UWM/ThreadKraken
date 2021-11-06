@@ -32,3 +32,4 @@ parameter SLB       =   3'b010;
 
 // PC Address
 parameter START_PC  =   32'h0001_1000;
+parameter HANDLER   =   32'h0001_0000;
