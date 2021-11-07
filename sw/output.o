@@ -19,4 +19,5 @@ line 17    cmd: ld r1,r31, 0x7FF              binary: 00001111110111111111110000
 line 18    cmd: jal r0, 0x1FF                 binary: 00000000000001111111110000010100 
 line 19    cmd: jalr r31, r1, 0x234           binary: 11111000010010001101000001010100 
 line 20    cmd: beq r1,r4, 45                 binary: 00100000010000001011010000110100 
-line 21    cmd: JAL r1, .why                  binary: 0 
+line 21    cmd: JAL r1, .why                  binary: 00001000001111111111100000010100 
+line 22    cmd: beq r0,r1, .gg                binary: 00001000001111111010010000110100 

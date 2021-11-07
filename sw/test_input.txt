@@ -1,3 +1,4 @@
+.gg
 add r1, r2, r3
 adda r3, r2, r1
 not r5, r10
@@ -23,5 +24,6 @@ jalr r31, r1, 0x234
 beq r1,r4, 45
 
 JAL r1, .why
+beq r0,r1, .gg
 
 

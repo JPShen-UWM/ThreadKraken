@@ -287,7 +287,7 @@ class Assembler:
 
     # jal
     # JAL rd, imm    |     PC = PC + 1 + imm; rd = PC + 1
-    def _jal(cmd, labels = []):
+    def _jal(cmd, labels, curPC):
       OPCODE = '0001010'
       IMM_LEN = 12
 
@@ -298,8 +298,9 @@ class Assembler:
 
       rd = bin(int(rd[1:]))
       if imm in labels:
-        imm = labels[imm]
-        imm = imm_to_bin(imm, IMM_LEN, mode=0)
+        diff = labels[imm] - curPC - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = imm_to_bin(str(diff), IMM_LEN, mode=1)
       else:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
       
@@ -307,7 +308,7 @@ class Assembler:
 
     # jalr
     # JALR rd, ra, imm     |    PC = ra + imm; rd = PC + 1
-    def _jalr(cmd, labels = []):
+    def _jalr(cmd, labels, curPC):
       OPCODE = '0101010'
       IMM_LEN = 12
 
@@ -318,8 +319,8 @@ class Assembler:
 
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
       if imm in labels:
-        imm = labels[imm]
-        imm = imm_to_bin(imm, IMM_LEN, mode=0)
+        diff = labels[imm] - curPC - 1
+        imm = imm_to_bin(str(diff), IMM_LEN, mode=1)
       else:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
       
@@ -327,7 +328,7 @@ class Assembler:
     
     # beq 
     # BEQ ra, rb, imm      |     PC = PC +1 + imm if (ra == rb)
-    def _beq(cmd, labels = []):
+    def _beq(cmd, labels, curPC):
       OPCODE = '0011010'
       IMM_LEN = 12
 
@@ -338,8 +339,8 @@ class Assembler:
 
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
       if imm in labels:
-        imm = labels[imm]
-        imm = imm_to_bin(imm, IMM_LEN, mode=0)
+        diff = labels[imm] - curPC - 1
+        imm = imm_to_bin(str(diff), IMM_LEN, mode=1)
       else:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
       
@@ -347,7 +348,7 @@ class Assembler:
 
     # bneq 
     # BNEQ ra, rb, imm      |     PC = PC +1 + imm if (ra != rb)
-    def _bneq(cmd, labels):
+    def _bneq(cmd, labels, curPC):
       OPCODE = '0111010'
       IMM_LEN = 12
 
@@ -358,8 +359,8 @@ class Assembler:
 
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
       if imm in labels:
-        imm = labels[imm]
-        imm = imm_to_bin(imm, IMM_LEN, mode=0)
+        diff = labels[imm] - curPC - 1
+        imm = imm_to_bin(str(diff), IMM_LEN, mode=1)
       else:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
 
@@ -367,7 +368,7 @@ class Assembler:
 
     # blt 
     # BLT ra, rb, imm      |     PC = PC +1 + imm if (ra < rb)
-    def _blt(cmd, labels):
+    def _blt(cmd, labels, curPC):
       OPCODE = '1111010'
       IMM_LEN = 12
 
@@ -378,8 +379,8 @@ class Assembler:
 
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
       if imm in labels:
-        imm = labels[imm]
-        imm = imm_to_bin(imm, IMM_LEN, mode=0)
+        diff = labels[imm] - curPC - 1
+        imm = imm_to_bin(str(diff), IMM_LEN, mode=1)
       else:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
       
@@ -416,7 +417,7 @@ class Assembler:
 
         # default starting addr pointing to program section in virtual addr
         self.ADDR_OFFSET = 0x00011000
-        self.labels = collections.defaultdict(int)
+        self.labels = {}
         self.pc = 0
         self.programStack = []
         self.manRead = False
@@ -444,7 +445,7 @@ class Assembler:
     def processLabels(self, cmd):
         if not cmd: return
         if cmd[0] == ".":
-            self.labels[cmd] = hex(self.ADDR_OFFSET + self.pc)
+            self.labels[cmd] = self.pc
 
         else:
             self.programStack.append([self.pc, cmd])
@@ -471,13 +472,13 @@ class Assembler:
         try:
           if opcode[-1] == 'a' and opcode[:-1] in Assembler.cmd_table:
             if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-              retStr = Assembler.func_map[opcode[:-1]](cmd[1].lower(), self.labels)
+              retStr = Assembler.func_map[opcode[:-1]](cmd[1].lower(), self.labels, cmd[0])
             else: 
               retStr = Assembler.func_map[opcode[:-1]](cmd[1].lower())
             atomic = '1'
           else:
             if opcode in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-              retStr = Assembler.func_map[opcode](cmd[1].lower(), self.labels)
+              retStr = Assembler.func_map[opcode](cmd[1].lower(), self.labels, cmd[0])
             else:
               retStr = Assembler.func_map[opcode](cmd[1].lower())
             
@@ -485,7 +486,7 @@ class Assembler:
           print("\n!!!!!!!error!!!")
           print(e)
           print("****************************")
-          # exit()
+          exit()
           
         retStr = retStr[:-1] + atomic
         return retStr
