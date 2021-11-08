@@ -48,6 +48,7 @@ module thread_ctrl_tb();
     logic [31:0] nxt_pc_5    ;
     logic [31:0] nxt_pc_6    ;
     logic [31:0] nxt_pc_7    ;
+    logic        miss        ;
 
 
 
@@ -63,6 +64,7 @@ thread_ctrl iDUT(
     .act_trd   (act_trd   )  ,   // Act thread that sending the commend
     .obj_trd_in(obj_trd_in)  ,   // Objective thread that being kill, sleep, or wake
     .stall     (stall     )  ,   // Stall any action
+    .miss      (miss      )  ,
     .init_pc   (init_pc   )  ,   // Initial pc for a new thread
     .pc_wr     (pc_wr     )  ,
     .nxt_pc_0  (nxt_pc_0  )  ,
@@ -118,6 +120,7 @@ thread_ctrl iDUT(
         nxt_pc_5  = 0;
         nxt_pc_6  = 0;
         nxt_pc_7  = 0;
+        miss = 0;
     endfunction: init
 
     initial begin
