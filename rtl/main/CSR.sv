@@ -1,5 +1,5 @@
 /*
- * Module name: CSR.sv
+ * Module name: CSR
  * Engineer: Tommy Yee
  * Description: Interrupt enable and exception status register.
  * Dependency:
