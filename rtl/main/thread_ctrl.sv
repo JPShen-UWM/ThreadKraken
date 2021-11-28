@@ -20,7 +20,7 @@ module thread_ctrl(
     input [2:0]         act_trd     ,   // Act thread that sending the commend
     input [2:0]         obj_trd_in  ,   // Objective thread that being kill, sleep, or wake
     input               stall       ,   // Stall any action
-    input [2:0]         trd_miss    ,   // Thread encounter a cache miss
+    input [7:0]         trd_miss    ,   // Thread encounter a cache miss
     input               miss        ,   // Cache miss
     input [31:0]        init_pc     ,   // Initial pc for a new thread
     input [7:0]         pc_wr       ,
@@ -155,7 +155,7 @@ module thread_ctrl(
     end
     */
     // Cache miss control
-    logic [3:0] delay_count;
+    logic [5:0] delay_count;
     logic [7:0] wait_trd;
     logic [7:0] on_trd;
     assign run_trd = on_trd & ~(wait_trd);
@@ -165,17 +165,10 @@ module thread_ctrl(
             wait_trd <= 8'b0;
         end
         else begin
-            delay_count = delay_count + 1;
+            delay_count <= delay_count + 1;
             if(delay_count == 0) wait_trd <= 8'b0;
             else if(miss) begin
-                wait_trd[0] <= (trd_miss == 0);
-                wait_trd[1] <= (trd_miss == 1);
-                wait_trd[2] <= (trd_miss == 2);
-                wait_trd[3] <= (trd_miss == 3);
-                wait_trd[4] <= (trd_miss == 4);
-                wait_trd[5] <= (trd_miss == 5);
-                wait_trd[6] <= (trd_miss == 6);
-                wait_trd[7] <= (trd_miss == 7);
+                wait_trd <= wait_trd | trd_miss;
             end
         end
     end
