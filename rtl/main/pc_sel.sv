@@ -10,6 +10,8 @@
 
 module pc_sel
 (
+    input                   clk         ,
+    input                   rst_n       ,
     input       [2:0]       cur_trd     ,
     input       [31:0]      cur_pc      ,
     input       [2:0]       jmp_trd     ,
@@ -21,6 +23,9 @@ module pc_sel
     input       [2:0]       d_miss_trd  ,
     input       [31:0]      d_miss_pc   ,
     input                   d_miss      ,
+    input                   jmp_exp     ,
+    input                   exp_mode    ,
+    input                   return_op   ,
 
     output  logic   [31:0]  nxt_pc_0    ,
     output  logic   [31:0]  nxt_pc_1    ,
@@ -32,7 +37,7 @@ module pc_sel
     output  logic   [31:0]  nxt_pc_7    ,
     output  logic   [7:0]   pc_wr   
 );
-
+    logic[31:0] epc; // Return PC from exception
     always_comb begin
         nxt_pc_0 = HANDLER;
         nxt_pc_1 = HANDLER;
@@ -187,6 +192,84 @@ module pc_sel
             nxt_pc_7 = cur_pc + 1;
             pc_wr[7] = 1;
         end
+        if(jmp_exp & !exp_mode) begin
+            case(cur_pc)
+                0: begin
+                    nxt_pc_0 = HANDLER;
+                    pc_wr[0] = 1;
+                end
+                1: begin
+                    nxt_pc_1 = HANDLER;
+                    pc_wr[1] = 1;
+                end
+                2: begin
+                    nxt_pc_2 = HANDLER;
+                    pc_wr[2] = 1;
+                end
+                3: begin
+                    nxt_pc_3 = HANDLER;
+                    pc_wr[3] = 1;
+                end
+                4: begin
+                    nxt_pc_4 = HANDLER;
+                    pc_wr[4] = 1;
+                end
+                5: begin
+                    nxt_pc_5 = HANDLER;
+                    pc_wr[5] = 1;
+                end
+                6: begin
+                    nxt_pc_6 = HANDLER;
+                    pc_wr[6] = 1;
+                end
+                7: begin
+                    nxt_pc_7 = HANDLER;
+                    pc_wr[7] = 1;
+                end
+            endcase
+        end
+        else if(return_op) begin
+            case(cur_pc)
+                0: begin
+                    nxt_pc_0 = epc;
+                    pc_wr[0] = 1;
+                end
+                1: begin
+                    nxt_pc_1 = epc;
+                    pc_wr[1] = 1;
+                end
+                2: begin
+                    nxt_pc_2 = epc;
+                    pc_wr[2] = 1;
+                end
+                3: begin
+                    nxt_pc_3 = epc;
+                    pc_wr[3] = 1;
+                end
+                4: begin
+                    nxt_pc_4 = epc;
+                    pc_wr[4] = 1;
+                end
+                5: begin
+                    nxt_pc_5 = epc;
+                    pc_wr[5] = 1;
+                end
+                6: begin
+                    nxt_pc_6 = epc;
+                    pc_wr[6] = 1;
+                end
+                7: begin
+                    nxt_pc_7 = epc;
+                    pc_wr[7] = 1;
+                end
+            endcase
+        end
+    end
+
+    
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) epc <= START_PC;
+        else if(jmp_exp & !exp_mode)  epc <= cur_pc;
     end
 
 endmodule

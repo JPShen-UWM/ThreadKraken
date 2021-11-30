@@ -33,7 +33,6 @@ module insfetch
 
 
     output  logic   [2:0]   new_trd     ,
-    output  logic   [31:0]  ins         ,
     output  logic   [2:0]   trd_dec     ,   // Thread at decoder stage
     output  logic           flushID     ,
     output  logic           flushEX     ,
@@ -43,6 +42,7 @@ module insfetch
     output  logic   [7:0]   run_trd     ,
     output  logic   [7:0]   valid_trd   ,
     output  logic   [31:0]  i_addr      ,
+    output  logic           i_rd        ,
     output  logic   [7:0]   child_0     ,
     output  logic   [7:0]   child_1     ,
     output  logic   [7:0]   child_2     ,
@@ -59,18 +59,34 @@ module insfetch
     logic miss;
     logic [7:0] pc_wr;
     logic [7:0] trd_miss;
+    logic [2:0] cur_trd;
+    logic exp_mode, jmp_exp, return_op;
 
 
     // Thread miss
     always_comb begin
         trd_miss = 0;
-        trd_miss[i_miss_trd] = i_miss;
+        trd_miss[trd_dec] = i_miss;
         trd_miss[d_miss_trd] = d_miss;
         miss = i_miss | d_miss;
     end
 
     assign i_addr = pc_if;
+    assign i_rd = run_trd[cur_trd];
+    assign atomic = i_data[0] | exp_mode;
 
+    // Exception mode
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) begin
+            exp_mode <= 0;
+        end
+        else if(jmp_exp) begin
+            exp_mode <= 1;
+        end
+        else if(return_op) begin
+            exp_mode <= 0;
+        end
+    end
 
     // Thread control
     thread_ctrl THREAD_CTRL(
@@ -120,6 +136,8 @@ module insfetch
 
     pc_sel PC_SEL
     (
+        .clk         (clk       ),
+        .rst_n       (rst_n     ),
         .cur_trd     (cur_trd   ),
         .cur_pc      (pc_if     ),
         .jmp_trd     (jmp_trd   ),
@@ -131,6 +149,9 @@ module insfetch
         .d_miss_trd  (d_miss_trd),
         .d_miss_pc   (d_miss_pc ),
         .d_miss      (d_miss    ),
+        .jmp_exp     (jmp_exp   ),
+        .exp_mode    (exp_mode  ),
+        .return_op   (return_op ),
 
         .nxt_pc_0    (nxt_pc_0),
         .nxt_pc_1    (nxt_pc_1),
@@ -143,5 +164,14 @@ module insfetch
         .pc_wr       (pc_wr   )
     );
 
+    // Pipeline
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) begin
+            trd_dec <= 3'b0;
+        end
+        else begin
+            trd_dec <= cur_trd;
+        end
+    end
 
 endmodule

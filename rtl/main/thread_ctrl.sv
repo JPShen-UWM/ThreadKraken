@@ -158,7 +158,7 @@ module thread_ctrl(
     logic [5:0] delay_count;
     logic [7:0] wait_trd;
     logic [7:0] on_trd;
-    assign run_trd = on_trd & ~(wait_trd);
+    assign run_trd = on_trd & ~(wait_trd) & !trd_miss;
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
             delay_count <= 0;
@@ -173,12 +173,15 @@ module thread_ctrl(
         end
     end
 
+    logic [2:0] last_trd, cur_trd_tmp;
+
     // Thread pointer
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n) cur_trd <= 0;
-        else cur_trd <= nxt_trd;
+        if(!rst_n) cur_trd_tmp <= 0;
+        else cur_trd_tmp <= nxt_trd;
     end
 
+    assign cur_trd = (atomic|stall)? last_trd: cur_trd_tmp;
     always_comb begin
         nxt_trd = 0;
         case(cur_trd)
@@ -263,7 +266,7 @@ module thread_ctrl(
                 else nxt_trd = 7; 
             end
         endcase
-        if(stall | atomic) nxt_trd = cur_trd;
+        //if(stall | atomic) nxt_trd = cur_trd;
     end
 
 
