@@ -12,20 +12,26 @@
 
 // [-- tag: 0 bits --] [---------- index: 9 bits ----------] [---- offset: 0 bits ----]
 
-module i_cache(
+module d_cache(
     input  logic                clk,
     input  logic                rst_n,
-    input  logic [19:0]         addr_in,
+    input  logic [31:0]         addr_in,
+	input  logic [31:0]         dma_addr_in,
+	input  logic [31:0]         dma_data[0:15],
     input  logic [31:0]         wr_data, // 32-bit cache line to write
     input  logic                wr_en,
     input  logic                rd_en,
+    input  logic [2:0]          cur_trd,
 
+	output logic [31:0]         dma_wr_data,
+	output logic [31:0]         dma_addr,
+	output logic [1:0]          dma_mode, // 01 read, 10 write
     output logic [31:0]         wb_data,
-    output logic                miss,
+    output logic                d_miss,
 	output logic                d_cache_seg_fault // assert when trying to access out of range
 );
 	// memory declaration
-    logic [31:0]                mem[0:511]; // 16kB cache, 4 byte line
+    logic [33:0]                mem[0:511]; // {vld, dirty, data[31:0]}
 	
 	// internal signals
     logic [8:0]                 index;
