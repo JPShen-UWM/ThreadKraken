@@ -40,6 +40,7 @@ module insdec
     output  logic           i_type 
 );
 
+<<<<<<< Updated upstream
 // Test
 
     // Decode
@@ -61,4 +62,6 @@ module insdec
         .invalid     (invalid     ),
         .i_type      (i_type )
     );
+=======
+>>>>>>> Stashed changes
 // Test
