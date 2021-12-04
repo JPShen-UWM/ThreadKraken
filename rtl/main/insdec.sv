@@ -61,3 +61,4 @@ module insdec
         .invalid     (invalid     ),
         .i_type      (i_type )
     );
+// Test
