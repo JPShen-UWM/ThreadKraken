@@ -10,10 +10,10 @@ module decode
 (
     input           [31:0]  ins         ,
 
-    output          [4:0]   reg_rd_a    ,
-    output          [4:0]   reg_rd_b    ,
-    output          [4:0]   reg_wr      ,
-    output          [15:0]  imm         ,
+    output  logic   [4:0]   reg_rd_a    ,
+    output  logic   [4:0]   reg_rd_b    ,
+    output  logic   [4:0]   reg_wr      ,
+    output  logic   [15:0]  imm         ,
 
     output  logic           wr_en       ,
     output  logic           alu_op      ,
