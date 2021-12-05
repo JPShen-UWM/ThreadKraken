@@ -20,6 +20,8 @@ module thread_ctrl(
     input [2:0]         act_trd     ,   // Act thread that sending the commend
     input [2:0]         obj_trd_in  ,   // Objective thread that being kill, sleep, or wake
     input               stall       ,   // Stall any action
+    input [7:0]         trd_miss    ,   // Thread encounter a cache miss
+    input               miss        ,   // Cache miss
     input [31:0]        init_pc     ,   // Initial pc for a new thread
     input [7:0]         pc_wr       ,
     input [31:0]        nxt_pc_0    ,
@@ -40,7 +42,7 @@ module thread_ctrl(
     output logic        trd_of      ,   // Thread overflow: trying the create a new thread when all threads are used
     output logic        invalid_op  ,   // Trying to kill or sleep a thread that is not its child or itself
     output logic        error       ,   // Other unrecoverable error
-    output logic        cur_pc      ,   // Current pc
+    output logic [31:0] cur_pc      ,   // Current pc
     output logic [7:0]  child_0     ,   // Children thread of thread 0
     output logic [7:0]  child_1     ,   // Children thread of thread 1
     output logic [7:0]  child_2     ,   // Children thread of thread 2
@@ -152,12 +154,39 @@ module thread_ctrl(
         endcase
     end
     */
-    // Thread pointer
+    // Cache miss control
+    logic [5:0] delay_count;
+    logic [7:0] wait_trd;
+    logic [7:0] on_trd;
+    assign run_trd = on_trd & ~(wait_trd) & !trd_miss;
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n) cur_trd <= 0;
-        else cur_trd <= nxt_trd;
+        if(!rst_n) begin
+            delay_count <= 0;
+            wait_trd <= 8'b0;
+        end
+        else begin
+            delay_count <= delay_count + 1;
+            if(delay_count == 0) wait_trd <= 8'b0;
+            else if(miss) begin
+                wait_trd <= wait_trd | trd_miss;
+            end
+        end
     end
 
+    logic [2:0] last_trd, cur_trd_tmp;
+
+    // Thread pointer
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) cur_trd_tmp <= 0;
+        else cur_trd_tmp <= nxt_trd;
+    end
+
+    // Initial init
+    logic rst_init;
+    always_ff @(posedge clk) begin
+        rst_init <= !rst_n;
+    end
+    assign cur_trd = (atomic|stall)? last_trd: cur_trd_tmp;
     always_comb begin
         nxt_trd = 0;
         case(cur_trd)
@@ -242,7 +271,7 @@ module thread_ctrl(
                 else nxt_trd = 7; 
             end
         endcase
-        if(stall | atomic) nxt_trd = cur_trd;
+        //if(stall | atomic) nxt_trd = cur_trd;
     end
 
 
@@ -263,7 +292,7 @@ module thread_ctrl(
         else if(!valid_trd[7]) nxt_new_trd = 7;
     end
 
-    assign init = init_trd;
+    assign init = init_trd | rst_init;
     assign obj_trd = init? new_trd: obj_trd_in;
     
     // Current pc
@@ -298,7 +327,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_0), 
         .par_trd    (par_trd_0),
         .valid      (valid_trd[0]),  
-        .running    (run_trd[0]),      
+        .running    (on_trd[0]),      
         .error      (csr_error[0])
     );
 
@@ -319,7 +348,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_1), 
         .par_trd    (par_trd_1),
         .valid      (valid_trd[1]),  
-        .running    (run_trd[1]),      
+        .running    (on_trd[1]),      
         .error      (csr_error[1])
     );
 
@@ -340,7 +369,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_2), 
         .par_trd    (par_trd_2),
         .valid      (valid_trd[2]),  
-        .running    (run_trd[2]),      
+        .running    (on_trd[2]),      
         .error      (csr_error[2])
     );
 
@@ -361,7 +390,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_3), 
         .par_trd    (par_trd_3),
         .valid      (valid_trd[3]),  
-        .running    (run_trd[3]),      
+        .running    (on_trd[3]),      
         .error      (csr_error[3])
     );
 
@@ -382,7 +411,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_4), 
         .par_trd    (par_trd_4),
         .valid      (valid_trd[4]),  
-        .running    (run_trd[4]),      
+        .running    (on_trd[4]),      
         .error      (csr_error[4])
     );
 
@@ -403,7 +432,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_5), 
         .par_trd    (par_trd_5),
         .valid      (valid_trd[5]),  
-        .running    (run_trd[5]),      
+        .running    (on_trd[5]),      
         .error      (csr_error[5])
     );
 
@@ -424,7 +453,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_6), 
         .par_trd    (par_trd_6),
         .valid      (valid_trd[6]),  
-        .running    (run_trd[6]),      
+        .running    (on_trd[6]),      
         .error      (csr_error[6])
     );
 
@@ -445,7 +474,7 @@ module thread_ctrl(
         .cur_pc     (cur_pc_7), 
         .par_trd    (par_trd_7),
         .valid      (valid_trd[7]),  
-        .running    (run_trd[7]),      
+        .running    (on_trd[7]),      
         .error      (csr_error[7])
     );
     assign error = trd_full & init;
