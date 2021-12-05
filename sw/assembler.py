@@ -1,7 +1,10 @@
 # Assembler for ThreadKraken assembly code.
 # converts assembly code to binary code
-#
-#
+# Author: zhengzhi Chen
+# 
+# Usage: python3 assember inputfile -h -o outfile
+# -h: human read format, debug use
+# -o: specify output file name, otherwise: output.o
 import sys
 import collections
 import re
@@ -421,12 +424,16 @@ class Assembler:
         self.pc = 0
         self.programStack = []
         self.manRead = False
+        self.binaryFormat = False
 
     def setOffset(self, addr):
         self.ADDR_OFFSET = addr
 
     def setReadableOutput(self, bool):
         self.manRead = bool
+    
+    def setBinaryFormat(self, bool):
+        self.binaryFormat = bool
 
     def compile(self, inFilename, outFilename='./output.o'):
         print("compile %s" %inFilename)
@@ -443,7 +450,7 @@ class Assembler:
         return
 
     def processLabels(self, cmd):
-        if not cmd: return
+        if not cmd or cmd[0] == '#': return
         if cmd[0] == ".":
             self.labels[cmd] = self.pc
 
@@ -459,7 +466,7 @@ class Assembler:
             if not self.manRead:
               outfile.write(binaryCmd + '\n')
             else:
-              outfile.write('line %s cmd: %s binary: %s \n' %(str(line[0]).ljust(5), line[1].ljust(29), binaryCmd))
+              outfile.write('line %s cmd: %s binary/hex: %s \n' %(str(line[0]).ljust(5), line[1].ljust(29), binaryCmd))
         return
 
     def processCmd(self, cmd):
@@ -484,18 +491,26 @@ class Assembler:
             
         except Exception as e:
           print("\n!!!!!!!error!!!")
-          print(e)
+          print(e.__traceback__.tb_frame)
+          print(e.__traceback__.tb_lineno)
           print("****************************")
           exit()
           
         retStr = retStr[:-1] + atomic
-        return retStr
+        dec = int(retStr,2)
+        hexStr = l_ext(hex(dec),8)
+        return hexStr if not self.binaryFormat else retStr
 
 
 
 if __name__ == "__main__":
     asm = Assembler()
+    outFilename = None
     if '-h' in sys.argv:
       asm.setReadableOutput(True)
-    asm.compile(sys.argv[1])
-    print(asm.labels)
+    if '-b' in sys.argv:
+      asm.setBinaryFormat(True)
+    if '-o' in sys.argv:
+      outFilename = sys.argv[sys.argv.index('-o') + 1]
+    asm.compile(sys.argv[1], outFilename)
+    print('labels used: {asm.labels}')
