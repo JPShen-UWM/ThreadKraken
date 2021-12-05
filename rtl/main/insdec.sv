@@ -94,7 +94,7 @@ module insdec
         .wr_trd      (wr_trd_wb   ),
         .reg_wr      (reg_wr      ),
         .wr_en       (wr_en       ),
-        .wr_data     (wr_data     ),
+        .wr_data     (data_wb     ),
         .init        (init_trd_dec),
         .init_trd    (new_trd_id  ),
         .rd_data_a   (data_a_exe  ),

@@ -113,7 +113,8 @@ module threadkraken_top(
         .act_trd            (trd_wb         ),
         .obj_trd            (obj_trd_wb     ),
         .init_pc            (data_a_exe     ),
-        
+        .stall              (stall          ),
+
         .pc_dec             (pc_dec         ),
         .new_trd            (new_trd_id     ),
         .trd_if             (trd_if         ),

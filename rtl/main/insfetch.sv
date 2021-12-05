@@ -30,7 +30,7 @@ module insfetch
     input       [2:0]       act_trd     ,
     input       [2:0]       obj_trd     ,
     input       [31:0]      init_pc     ,
-
+    input                   stall       ,
 
     output  logic   [31:0]  pc_dec      ,
     output  logic   [2:0]   new_trd     ,
