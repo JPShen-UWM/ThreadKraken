@@ -1,0 +1,4 @@
+lbi r30 0xFFFF
+slbi r30 0xFFFF
+
+kill r0
