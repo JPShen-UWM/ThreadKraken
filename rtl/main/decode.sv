@@ -16,9 +16,10 @@ module decode
     output  logic   [15:0]  imm         ,
 
     output  logic           wr_en       ,
-    output  logic           alu_op      ,
+    output  logic   [2:0]   alu_op      ,
     output  logic   [1:0]   mem_ctrl    ,
     output  logic   [1:0]   trd_ctrl    ,
+    output  logic           wb_sel      ,
     output  logic           init        ,
     output  logic           exp_jmp     ,
     output  logic           exp_return  ,
@@ -27,6 +28,10 @@ module decode
     output  logic           i_type 
 );
 
+    // wb_sel:
+    // 0: write back from exe output
+    // 1: write back from mem read
+    
     // mem_ctrl:
     // 01: read
     // 10: write

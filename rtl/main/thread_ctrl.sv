@@ -42,7 +42,7 @@ module thread_ctrl(
     output logic        trd_of      ,   // Thread overflow: trying the create a new thread when all threads are used
     output logic        invalid_op  ,   // Trying to kill or sleep a thread that is not its child or itself
     output logic        error       ,   // Other unrecoverable error
-    output logic        cur_pc      ,   // Current pc
+    output logic [31:0] cur_pc      ,   // Current pc
     output logic [7:0]  child_0     ,   // Children thread of thread 0
     output logic [7:0]  child_1     ,   // Children thread of thread 1
     output logic [7:0]  child_2     ,   // Children thread of thread 2
@@ -181,6 +181,11 @@ module thread_ctrl(
         else cur_trd_tmp <= nxt_trd;
     end
 
+    // Initial init
+    logic rst_init;
+    always_ff @(posedge clk) begin
+        rst_init <= !rst_n;
+    end
     assign cur_trd = (atomic|stall)? last_trd: cur_trd_tmp;
     always_comb begin
         nxt_trd = 0;
@@ -287,7 +292,7 @@ module thread_ctrl(
         else if(!valid_trd[7]) nxt_new_trd = 7;
     end
 
-    assign init = init_trd;
+    assign init = init_trd | rst_init;
     assign obj_trd = init? new_trd: obj_trd_in;
     
     // Current pc

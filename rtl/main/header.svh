@@ -4,7 +4,7 @@
  * Description: header file for the project, define global variable
  * Dependency:
  * Status: testing
- */
+**/
 
 parameter threads   = 8;
 

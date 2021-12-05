@@ -32,7 +32,9 @@ module insfetch
     input       [31:0]      init_pc     ,
 
 
+    output  logic   [31:0]  pc_dec      ,
     output  logic   [2:0]   new_trd     ,
+    output  logic   [2:0]   trd_if      ,
     output  logic   [2:0]   trd_dec     ,   // Thread at decoder stage
     output  logic           flushID     ,
     output  logic           flushEX     ,
@@ -61,6 +63,7 @@ module insfetch
     logic [7:0] trd_miss;
     logic [2:0] cur_trd;
     logic exp_mode, jmp_exp, return_op;
+    logic [2:0] nxt_trd;
 
 
     // Thread miss
@@ -88,6 +91,14 @@ module insfetch
         end
     end
 
+    logic [31:0] nxt_pc_0;
+    logic [31:0] nxt_pc_1;
+    logic [31:0] nxt_pc_2;
+    logic [31:0] nxt_pc_3;
+    logic [31:0] nxt_pc_4;
+    logic [31:0] nxt_pc_5;
+    logic [31:0] nxt_pc_6;
+    logic [31:0] nxt_pc_7;
     // Thread control
     thread_ctrl THREAD_CTRL(
         .clk         (clk),
@@ -143,8 +154,8 @@ module insfetch
         .jmp_trd     (jmp_trd   ),
         .jmp_pc      (jmp_pc    ),
         .jmp         (jmp       ),
-        .i_miss_trd  (i_miss_trd),
-        .i_miss_pc   (i_miss_pc ),
+        .i_miss_trd  (trd_dec   ),
+        .i_miss_pc   (pc_dec    ),
         .i_miss      (i_miss    ),
         .d_miss_trd  (d_miss_trd),
         .d_miss_pc   (d_miss_pc ),
@@ -168,9 +179,11 @@ module insfetch
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
             trd_dec <= 3'b0;
+            pc_dec <= 0;
         end
         else begin
             trd_dec <= cur_trd;
+            pc_dec <= i_addr;
         end
     end
 
