@@ -5,7 +5,11 @@
  * Dependency: 
  * Status: done
  */
- module csr(
+ module csr
+ #(
+    parameter thr_id = 8'h00
+ )
+ (
     input  logic        clk,                // global clock
     input  logic        rst_n,              // global async active low reset
     input  logic        clr_ex,             // clear exception code and interrupt
@@ -16,9 +20,8 @@
     input  logic        stack_overflow,
     input  logic        breakpoint,         // user breakpoint
     input  logic        cpu_error,          // some other unrecoverable error
-    input  logic [7:0]  thr_id,             // pointer of child thread
 
-    output logic [5:0]  ex_cause,            // 6 bit code for exception cause
+    output logic [5:0]  ex_cause,           // 6 bit code for exception cause
     output logic [7:0]  cause_thr,
     output logic        csr_stall
 );
