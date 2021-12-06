@@ -61,7 +61,7 @@ module decode
 
     assign imm = ins[25:10];
     assign reg_rd_a = ins[26:22];
-    assign reg_rd_b = (ins[4:1]==BRANCH | ins[4:1]==MEMOP)? ins[31:27] : ins[21:17];
+    assign reg_rd_b = (ins[4:1]==BRANCH | ins[4:1]==MEMOP | ins[4:1]==LOADI)? ins[31:27] : ins[21:17];
     assign reg_wr = ins[31:27];
     assign alu_op = ins[7:5];
 
