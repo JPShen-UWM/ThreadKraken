@@ -528,6 +528,8 @@ class Assembler:
               outfile.write(binaryCmd + '\n')
             else:
               outfile.write('line %s cmd: %s binary/hex: %s \n' %(str(line[0]).ljust(5), line[1].ljust(29), binaryCmd))
+            outfile.flush()
+          outfile.close()
         return
 
     def processCmd(self, cmd):

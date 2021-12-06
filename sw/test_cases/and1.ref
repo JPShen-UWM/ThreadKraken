@@ -1,4 +1,4 @@
-line 0     cmd: addi r21 r0 0x0F              binary/hex: a8003cdc 
-line 1     cmd: addi r22 r0 0xF0              binary/hex: b003c0dc 
-line 2     cmd: and r23 r21 r22               binary/hex: bd6c00fe 
-line 3     cmd: kill r0                       binary/hex: 0000001c 
+line 0     cmd: addi r21 r0 0x0F              binary/hex: 10101000000000000011110011011100 
+line 1     cmd: addi r22 r0 0xF0              binary/hex: 10110000000000111100000011011100 
+line 2     cmd: and r23 r21 r22               binary/hex: 10111101011011000000000011111110 
+line 3     cmd: kill r0                       binary/hex: 00000000000000000000000000011100 

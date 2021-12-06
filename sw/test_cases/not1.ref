@@ -1,3 +1,3 @@
-line 0     cmd: add r21 r0 r0                 binary/hex: a80000de 
-line 1     cmd: not r21 r21                   binary/hex: ad40001e 
-line 2     cmd: kill r0                       binary/hex: 0000001c 
+line 0     cmd: add r21 r0 r0                 binary/hex: 10101000000000000000000011011110 
+line 1     cmd: not r21 r21                   binary/hex: 10101101010000000000000000011110 
+line 2     cmd: kill r0                       binary/hex: 00000000000000000000000000011100 
