@@ -1,3 +1,10 @@
+# compiles test_cases in batch
+# author: zhengzhi chen
+# usage: 
+#   to compile:   python3 make.py 
+#   to clean:     python3 make.py clean
+#
+
 from assembler import Assembler
 import os
 import sys
@@ -12,9 +19,8 @@ if __name__ == '__main__':
 				os.remove('./test_cases/'+file)
 	else:
 		for file in files:
-			asm = Assembler()
 			if '.asm' in file:
-				print('name: '+file)
+				asm = Assembler()
 				asm.compile('./test_cases/'+file, './test_cases/'+file[:-4]+'.o')
 				asm = Assembler()
 				asm.setBinaryFormat(True)
