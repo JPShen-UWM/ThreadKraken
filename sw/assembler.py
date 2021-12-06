@@ -206,10 +206,10 @@ class Assembler:
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
       imm = imm_to_bin(imm, IMM_LEN)
       
-      return l_ext(rd,5) + l_ext(ra,5) + imm + '0'*9 + OPCODE + '0'   
+      return l_ext(rd,5) + l_ext(ra,5) + '0'*7 + imm + '0'*2 + OPCODE + '0'   
 
-    # shrt
-    # SHRT rd, ra, imm     |    rd = ra >> imm
+    # shrt  (arithmetic)
+    # SHRT rd, ra, imm     |    rd = ra >>> imm
     def _shrt(cmd):
       OPCODE = '0101100'
       IMM_LEN = 5
@@ -222,7 +222,23 @@ class Assembler:
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
       imm = imm_to_bin(imm, IMM_LEN)
       
-      return l_ext(rd,5) + l_ext(ra,5) + imm + '0'*9 + OPCODE + '0'   
+      return l_ext(rd,5) + l_ext(ra,5) + '0'*7 + imm + '0'*2 + OPCODE + '0'     
+
+    # shra
+    # SHRA rd, ra, imm     |    rd = ra >> imm
+    def _shra(cmd):
+      OPCODE = '1001100'
+      IMM_LEN = 5
+
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      if rd[0] != 'r' or ra[0] != 'r' :
+        raise Exception('Unrecognized arguments...')
+
+      rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
+      imm = imm_to_bin(imm, IMM_LEN)
+      
+      return l_ext(rd,5) + l_ext(ra,5) + '0'*7 + imm + '0'*2 + OPCODE + '0'     
 
     # lbi
     # LBI rd, imm    |     rd[15:0] = imm
@@ -259,7 +275,7 @@ class Assembler:
     # st
     # ST ra, rb, imm     |     M[ra + imm] = rb
     def _st(cmd):
-      OPCODE = '11000'
+      OPCODE = '01101000'
       IMM_LEN = 12
 
       args = re.split(',| ', cmd)
@@ -270,12 +286,12 @@ class Assembler:
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
       imm = imm_to_bin(imm, IMM_LEN) # no negative
       
-      return l_ext(rb,5) + l_ext(ra,5) + imm + '0'*4 + OPCODE + '0'   
+      return l_ext(rb,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
     
     # ld
     # LD rd, ra, imm      |      rd = M[ra + imm]
     def _ld(cmd):
-      OPCODE = '01000'
+      OPCODE = '11101000'
       IMM_LEN = 12
 
       args = re.split(',| ', cmd)
@@ -286,7 +302,7 @@ class Assembler:
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
       imm = imm_to_bin(imm, IMM_LEN) # no negative
       
-      return l_ext(rd,5) + l_ext(ra,5) + imm + '0'*4 + OPCODE + '0'   
+      return l_ext(rd,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
 
     # jal
     # JAL rd, imm    |     PC = PC + 1 + imm; rd = PC + 1
@@ -461,6 +477,7 @@ class Assembler:
       'xori': _xori,
       'shlt': _shlt, 
       'shrt': _shrt, 
+      'shra': _shra,
       'lbi': _lbi, 
       'slbi': _slbi,
       'st': _st, 
@@ -514,7 +531,10 @@ class Assembler:
             self.labels[cmd] = self.pc
 
         else:
-            self.programStack.append([self.pc, cmd])
+            if cmd.find('/') != -1:
+              self.programStack.append([self.pc, cmd[:cmd.find('/')]])
+            else:
+              self.programStack.append([self.pc, cmd])
             self.pc += 1
         return
 
@@ -535,7 +555,7 @@ class Assembler:
         opcode= args[0].lower()
         retStr = ''
         atomic = '0'
-
+        
         # print('pc %d -> cmd %s' %(cmd[0], opcode))
         try:
           if opcode[-1] == 'a' and opcode[:-1] in Assembler.cmd_table:
