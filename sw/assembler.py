@@ -477,8 +477,6 @@ class Assembler:
     }
     
     def __init__(self):
-        print("start translation:")
-
         # default starting addr pointing to program section in virtual addr
         self.ADDR_OFFSET = 0x00011000
         self.labels = {}
