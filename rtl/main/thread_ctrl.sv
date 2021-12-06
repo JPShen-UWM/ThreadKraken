@@ -278,7 +278,7 @@ module thread_ctrl(
     // New Thread pointer
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) new_trd <= 0;
-        else if(init_trd) new_trd <= nxt_new_trd;
+        else if(init) new_trd <= nxt_new_trd;
     end
 
     always_comb begin
@@ -316,7 +316,7 @@ module thread_ctrl(
         .clk        (clk),
         .rst_n      (rst_n),
         .init       (init),   
-        .init_pc    (init_pc),
+        .init_pc    (START_PC),
         .slp        (slp),    
         .kill       (kill),   
         .wake       (wake),   

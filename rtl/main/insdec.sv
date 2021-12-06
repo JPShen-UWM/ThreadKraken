@@ -57,9 +57,7 @@ module insdec
     logic   [2:0]   alu_op      ;
     logic   [1:0]   mem_ctrl    ;
     logic   [1:0]   trd_ctrl    ;
-    logic           init        ;
     logic   [3:0]   jmp_con     ;
-    logic           invalid     ;
     logic           i_type      ;
     logic           wb_sel      ;
 
@@ -119,8 +117,10 @@ module insdec
             i_type_exe      <= 0;
             init_trd_exe    <= 0;
             new_trd_exe     <= 0;
+            trd_exe         <= 0;
         end
         else begin
+            trd_exe         <= trd_dec;
             pc_exe          <= pc_dec;
             ins_exe         <= ins_dec;
             reg_rd_a_exe    <= reg_rd_a;

@@ -50,15 +50,15 @@ module pc_sel
         pc_wr = 0;
 
         // Thread 0
-        if(d_miss_trd == 0) begin
+        if(d_miss_trd == 0 & d_miss) begin
             nxt_pc_0 = d_miss_pc;
             pc_wr[0] = 1;
         end
-        else if(i_miss_trd == 0) begin
+        else if(i_miss_trd == 0 & i_miss) begin
             nxt_pc_0 = i_miss_pc;
             pc_wr[0] = 1;
         end
-        else if(jmp_trd == 0) begin
+        else if(jmp_trd == 0 & jmp) begin
             nxt_pc_0 = jmp_pc;
             pc_wr[0] = 1;
         end
@@ -68,15 +68,15 @@ module pc_sel
         end
 
         // Thread 1
-        if(d_miss_trd == 1) begin
+        if(d_miss_trd == 1 & d_miss) begin
             nxt_pc_1 = d_miss_pc;
             pc_wr[1] = 1;
         end
-        else if(i_miss_trd == 1) begin
+        else if(i_miss_trd == 1 & i_miss) begin
             nxt_pc_1 = i_miss_pc;
             pc_wr[1] = 1;
         end
-        else if(jmp_trd == 1) begin
+        else if(jmp_trd == 1 & jmp) begin
             nxt_pc_1 = jmp_pc;
             pc_wr[1] = 1;
         end
@@ -86,15 +86,15 @@ module pc_sel
         end
 
         // Thread 2
-        if(d_miss_trd == 2) begin
+        if(d_miss_trd == 2 & d_miss) begin
             nxt_pc_2 = d_miss_pc;
             pc_wr[2] = 1;
         end
-        else if(i_miss_trd == 2) begin
+        else if(i_miss_trd == 2 & i_miss) begin
             nxt_pc_2 = i_miss_pc;
             pc_wr[2] = 1;
         end
-        else if(jmp_trd == 2) begin
+        else if(jmp_trd == 2 & jmp) begin
             nxt_pc_2 = jmp_pc;
             pc_wr[2] = 1;
         end
@@ -104,15 +104,15 @@ module pc_sel
         end
 
         // Thread 3
-        if(d_miss_trd == 3) begin
+        if(d_miss_trd == 3 & d_miss) begin
             nxt_pc_3 = d_miss_pc;
             pc_wr[3] = 1;
         end
-        else if(i_miss_trd == 3) begin
+        else if(i_miss_trd == 3 & i_miss) begin
             nxt_pc_3 = i_miss_pc;
             pc_wr[3] = 1;
         end
-        else if(jmp_trd == 3) begin
+        else if(jmp_trd == 3 & jmp) begin
             nxt_pc_3 = jmp_pc;
             pc_wr[3] = 1;
         end
@@ -122,15 +122,15 @@ module pc_sel
         end
 
         // Thread 4
-        if(d_miss_trd == 4) begin
+        if(d_miss_trd == 4 & d_miss) begin
             nxt_pc_4 = d_miss_pc;
             pc_wr[4] = 1;
         end
-        else if(i_miss_trd == 4) begin
+        else if(i_miss_trd == 4 & i_miss) begin
             nxt_pc_4 = i_miss_pc;
             pc_wr[4] = 1;
         end
-        else if(jmp_trd == 4) begin
+        else if(jmp_trd == 4 & jmp) begin
             nxt_pc_4 = jmp_pc;
             pc_wr[4] = 1;
         end
@@ -140,15 +140,15 @@ module pc_sel
         end
 
         // Thread 5
-        if(d_miss_trd == 5) begin
+        if(d_miss_trd == 5 & d_miss) begin
             nxt_pc_5 = d_miss_pc;
             pc_wr[5] = 1;
         end
-        else if(i_miss_trd == 5) begin
+        else if(i_miss_trd == 5 & i_miss) begin
             nxt_pc_5 = i_miss_pc;
             pc_wr[5] = 1;
         end
-        else if(jmp_trd == 5) begin
+        else if(jmp_trd == 5 & jmp) begin
             nxt_pc_5 = jmp_pc;
             pc_wr[5] = 1;
         end
@@ -158,15 +158,15 @@ module pc_sel
         end
 
         // Thread 6
-        if(d_miss_trd == 6) begin
+        if(d_miss_trd == 6 & d_miss) begin
             nxt_pc_6 = d_miss_pc;
             pc_wr[6] = 1;
         end
-        else if(i_miss_trd == 6) begin
+        else if(i_miss_trd == 6 & i_miss) begin
             nxt_pc_6 = i_miss_pc;
             pc_wr[6] = 1;
         end
-        else if(jmp_trd == 6) begin
+        else if(jmp_trd == 6 & jmp) begin
             nxt_pc_6 = jmp_pc;
             pc_wr[6] = 1;
         end
@@ -176,15 +176,15 @@ module pc_sel
         end
 
         // Thread 7
-        if(d_miss_trd == 7) begin
+        if(d_miss_trd == 7 & d_miss) begin
             nxt_pc_7 = d_miss_pc;
             pc_wr[7] = 1;
         end
-        else if(i_miss_trd == 7) begin
+        else if(i_miss_trd == 7 & i_miss) begin
             nxt_pc_7 = i_miss_pc;
             pc_wr[7] = 1;
         end
-        else if(jmp_trd == 7) begin
+        else if(jmp_trd == 7 & jmp) begin
             nxt_pc_7 = jmp_pc;
             pc_wr[7] = 1;
         end

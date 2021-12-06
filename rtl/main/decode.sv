@@ -75,6 +75,7 @@ module decode
         exp_return = 0;
         invalid = 0;
         i_type = 0;
+        wb_sel = 0;
         case(ins[4:1])
             CAL: begin
                 wr_en = 1;
@@ -96,6 +97,7 @@ module decode
                 i_type = 1;
                 if(ins[8]) begin
                     mem_ctrl = 1;
+                    wb_sel = 1;
                     wr_en = 1;
                 end
                 else begin
@@ -119,7 +121,6 @@ module decode
             EXC: begin
                 if(ins[5]) exp_jmp = 1;
                 else if(ins[6]) exp_return = 1;
-                else invalid = 1;
             end
             MULTI: begin
                 if(funct == 3'b111) begin

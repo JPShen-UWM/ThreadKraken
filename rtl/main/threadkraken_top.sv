@@ -14,6 +14,7 @@ module threadkraken_top(
     // MMU interface
     output  logic   [31:0]  i_addr      ,
     output  logic           i_rd        ,
+    output  logic   [2:0]   i_trd       ,
     input           [31:0]  i_rd_data   ,
     input                   i_miss      ,
     input                   i_segfault  ,
@@ -21,6 +22,7 @@ module threadkraken_top(
     output  logic   [31:0]  d_wr_data   ,
     output  logic           d_rd        ,
     output  logic           d_wr        ,
+    output  logic   [2:0]   d_trd       ,
     input           [31:0]  d_rd_data   ,
     input                   d_miss      ,
     input                   d_segfault  ,
@@ -48,8 +50,7 @@ module threadkraken_top(
     output  logic           trd_full    
 );
 
-    // Jump comand
-    logic [2:0] jmp_trd;    
+    // Jump comand   
     logic [31:0] jmp_pc;
     logic jmp_en;
     // Thread for each stage
@@ -57,7 +58,7 @@ module threadkraken_top(
     // PC for each stage
     logic [31:0] pc_dec, pc_exe, pc_mem, pc_wb;
     // ins for each stage
-    logic [31:0] ins_dec, ins_exe, ins_mem, ins_wb;
+    logic [31:0] ins_exe, ins_mem, ins_wb;
     // Thread op
     logic kill, sleep, wake, init_trd_dec, init_trd_exe;
     logic [2:0] obj_trd_mem, obj_trd_wb;
@@ -92,12 +93,21 @@ module threadkraken_top(
     // stall for data hazard
     logic stall;
 
+    assign i_trd = trd_if;
+    assign d_trd = trd_mem;
+    assign running = valid_trd[0];
+    assign alu_trd = trd_exe;
+    assign inv_op_trd = trd_dec;
+    assign breakpoint = exp_jmp_dec;
+    assign insfetch_trd = trd_if;
+    assign bp_trd = trd_dec;
+
     insfetch INSFETCH
     (   
         .clk                (clk            ),
         .rst_n              (rst_n          ),
 
-        .jmp_trd            (jmp_trd        ),
+        .jmp_trd            (trd_exe        ),
         .jmp_pc             (jmp_pc         ),
         .jmp                (jmp_en         ),
         .d_miss             (d_miss         ),
@@ -114,6 +124,8 @@ module threadkraken_top(
         .obj_trd            (obj_trd_wb     ),
         .init_pc            (data_a_exe     ),
         .stall              (stall          ),
+        .jmp_exp            (exp_jmp_dec    ),
+        .return_op          (exp_return_dec ),
 
         .pc_dec             (pc_dec         ),
         .new_trd            (new_trd_id     ),
@@ -143,7 +155,7 @@ module threadkraken_top(
         .clk                (clk            ),
         .rst_n              (rst_n          ),
 
-        .ins_dec            (ins_dec        ),
+        .ins_dec            (i_rd_data      ),
         .new_trd_id         (new_trd_id     ),
         .trd_dec            (trd_dec        ),
         .pc_dec             (pc_dec         ),
@@ -222,7 +234,6 @@ module threadkraken_top(
         .trd_ctrl_mem       (trd_ctrl_mem   ),
         .obj_trd_mem        (obj_trd_mem    ),
         .jmp_pc_exe         (jmp_pc         ),
-        .jmp_trd_exe        (jmp_trd        ),
         .jmp_en_exe         (jmp_en         ),
         .stall_exe          (stall          ), 
         .of_exe             (alu_exp        )

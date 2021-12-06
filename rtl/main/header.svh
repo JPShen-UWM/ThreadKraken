@@ -31,7 +31,7 @@ parameter LBI       =   3'b001;
 parameter SLB       =   3'b010;
 
 // PC Address
-parameter START_PC  =   32'h0001_1000;
+parameter START_PC  =   32'h0001_0100;
 parameter HANDLER   =   32'h0001_0000;
 
 // Init and end stack for each thread
