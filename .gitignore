@@ -6,3 +6,5 @@
 *.vscode
 rtl/work
 sw/test_cases/__pycache__
+*.o
+*.ref
