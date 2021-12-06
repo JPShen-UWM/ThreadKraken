@@ -514,7 +514,10 @@ class Assembler:
             self.labels[cmd] = self.pc
 
         else:
-            self.programStack.append([self.pc, cmd])
+            if cmd.find('/') != -1:
+              self.programStack.append([self.pc, cmd[:cmd.find('/')]])
+            else:
+              self.programStack.append([self.pc, cmd])
             self.pc += 1
         return
 
@@ -535,7 +538,7 @@ class Assembler:
         opcode= args[0].lower()
         retStr = ''
         atomic = '0'
-
+        
         # print('pc %d -> cmd %s' %(cmd[0], opcode))
         try:
           if opcode[-1] == 'a' and opcode[:-1] in Assembler.cmd_table:
