@@ -7,7 +7,7 @@
  */
  module csr
  #(
-    parameter thr_id = 8'h00
+    parameter ID = 8'h00
  )
  (
     input  logic        clk,                // global clock
@@ -21,11 +21,11 @@
     input  logic        breakpoint,         // user breakpoint
     input  logic        cpu_error,          // some other unrecoverable error
 
-    output logic [5:0]  ex_cause,           // 6 bit code for exception cause
-    output logic [7:0]  cause_thr,
+    output logic [5:0]  ex_code,           // 6 bit code for exception cause
+    output logic [7:0]  thr_id,
     output logic        csr_stall
-);
-    localparam          RESERVED   = 16'h0000;
+);  
+    localparam          RESERVED   = 17'h00000;
     localparam          EX_CLR     = 6'h00;
     localparam          ALU_EX     = 6'h01;
     localparam          IL_OP      = 6'h05;
@@ -38,26 +38,32 @@
  *  [ csr_stall |          reserved          |    thread id    |    ex code   ]
  */
     logic [31:0]        ctrl_reg;           // 32-bit csr
-    logic [5:0]         ex_code;
     
     // set csr with code or clear
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n)
-            ctrl_reg <= '0;
+            ctrl_reg <= {1'b0,RESERVED,ID,EX_CLR};
         else if(clr_ex)
-            ctrl_reg <= {1'b0,RESERVED,thr_id,EX_CLR};
-        else if(illegal_op || error)
-            ctrl_reg <= {1'b1,RESERVED,thr_id,IL_OP};
+            ctrl_reg <= {1'b0,RESERVED,ID,EX_CLR};
+        // alu op exception (div by 0)
+        else if(alu_op_ex)
+            ctrl_reg <= {1'b1,RESERVED,ID,ALU_EX};
+        // illegal instruction or unrecoverable error
+        else if(illegal_op || cpu_error)
+            ctrl_reg <= {1'b1,RESERVED,ID,IL_OP};
+        // stack overflow
         else if(stack_overflow)
-            ctrl_reg <= {1'b1,RESERVED,thr_id,STACK_OV};
+            ctrl_reg <= {1'b1,RESERVED,ID,STACK_OV};
+        // illegal memory access
         else if(i_cache_seg_fault || d_cache_seg_fault)
-            ctrl_reg <= {1'b1,RESERVED,thr_id,SEGFAULT};
+            ctrl_reg <= {1'b1,RESERVED,ID,SEGFAULT};
+        // user breakpoint
         else if(breakpoint)
-            ctrl_reg <= {1'b1,RESERVED,thr_id,BRKPT};
+            ctrl_reg <= {1'b1,RESERVED,ID,BRKPT};
 
     // output thread status and id
     assign csr_stall = ctrl_reg[31];
-    assign cause_thr = ctrl_reg[13:0];
-    assign ex_cause = ctrl_reg[5:0];
+    assign thr_id = ctrl_reg[13:6];
+    assign ex_code = ctrl_reg[5:0];
 
 endmodule
