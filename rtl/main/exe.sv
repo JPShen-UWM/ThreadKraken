@@ -23,6 +23,7 @@ module exe(
     input           [2:0]   trd_exe     ,
     input                   wb_sel_exe  ,
     input                   flushEX     ,
+    input                   stall       ,
     input           [2:0]   trd_wb      ,
     input           [4:0]   reg_wr_wb   ,
     input           [31:0]  wb_data_wb  ,
@@ -68,22 +69,35 @@ module exe(
         data_a_for = data_a_exe;
         data_b_for = data_b_exe;
         stall_exe = 0;
-        if(trd_mem == trd_exe & wr_en_mem) begin
+        // Forwarding a
+        if(trd_mem == trd_exe & wr_en_mem & reg_rd_a_exe == reg_wr_mem) begin
             if(wb_sel_mem) begin
-                if(reg_rd_a_exe == reg_wr_mem | reg_rd_b_exe == reg_wr_mem) begin
-                    stall_exe = 1;
-                end
+                stall_exe = 1;
             end
             else begin
                 if(reg_rd_a_exe == reg_wr_mem & |reg_wr_mem) data_a_for = exe_data_mem;
-                if(reg_rd_b_exe == reg_wr_mem & |reg_wr_mem) data_b_for = exe_data_mem;
             end
         end
         else if(trd_mem == trd_wb & wr_en_wb) begin
             if(reg_rd_a_exe == reg_wr_wb & |reg_wr_wb) data_a_for = wb_data_wb;
+        end
+
+        // Forwarding b
+        if(trd_mem == trd_exe & wr_en_mem & reg_rd_b_exe == reg_wr_mem) begin
+            if(wb_sel_mem) begin
+                stall_exe = 1;
+            end
+            else begin
+                if(reg_rd_b_exe == reg_wr_mem & |reg_wr_mem) data_b_for = exe_data_mem;
+            end
+        end
+        else if(trd_mem == trd_wb & wr_en_wb) begin
             if(reg_rd_b_exe == reg_wr_wb & |reg_wr_wb) data_b_for = wb_data_wb;
         end
     end
+
+
+
     alu ALU(
         .Ain        (data_a_for ),
         .Bin        (data_b_for ),
@@ -121,7 +135,7 @@ module exe(
             trd_ctrl_mem<= 0;
             obj_trd_mem <= 0;
         end
-        else begin
+        else if(!stall) begin
             addr_mem    <= alu_out_exe;
             ins_mem     <= ins_exe;
             pc_mem      <= pc_exe;

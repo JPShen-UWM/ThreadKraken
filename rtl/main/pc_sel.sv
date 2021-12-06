@@ -26,6 +26,7 @@ module pc_sel
     input                   jmp_exp     ,
     input                   exp_mode    ,
     input                   return_op   ,
+    input                   stall       ,
 
     output  logic   [31:0]  nxt_pc_0    ,
     output  logic   [31:0]  nxt_pc_1    ,
@@ -58,11 +59,11 @@ module pc_sel
             nxt_pc_0 = i_miss_pc;
             pc_wr[0] = 1;
         end
-        else if(jmp_trd == 0 & jmp) begin
+        else if(jmp_trd == 0 & jmp & !stall) begin
             nxt_pc_0 = jmp_pc;
             pc_wr[0] = 1;
         end
-        else if(cur_trd == 0) begin
+        else if(cur_trd == 0 & !stall) begin
             nxt_pc_0 = cur_pc + 1;
             pc_wr[0] = 1;
         end
@@ -76,11 +77,11 @@ module pc_sel
             nxt_pc_1 = i_miss_pc;
             pc_wr[1] = 1;
         end
-        else if(jmp_trd == 1 & jmp) begin
+        else if(jmp_trd == 1 & jmp & !stall) begin
             nxt_pc_1 = jmp_pc;
             pc_wr[1] = 1;
         end
-        else if(cur_trd == 1) begin
+        else if(cur_trd == 1 & !stall) begin
             nxt_pc_1 = cur_pc + 1;
             pc_wr[1] = 1;
         end
@@ -94,11 +95,11 @@ module pc_sel
             nxt_pc_2 = i_miss_pc;
             pc_wr[2] = 1;
         end
-        else if(jmp_trd == 2 & jmp) begin
+        else if(jmp_trd == 2 & jmp & !stall) begin
             nxt_pc_2 = jmp_pc;
             pc_wr[2] = 1;
         end
-        else if(cur_trd == 2) begin
+        else if(cur_trd == 2 & !stall) begin
             nxt_pc_2 = cur_pc + 1;
             pc_wr[2] = 1;
         end
@@ -112,11 +113,11 @@ module pc_sel
             nxt_pc_3 = i_miss_pc;
             pc_wr[3] = 1;
         end
-        else if(jmp_trd == 3 & jmp) begin
+        else if(jmp_trd == 3 & jmp & !stall) begin
             nxt_pc_3 = jmp_pc;
             pc_wr[3] = 1;
         end
-        else if(cur_trd == 3) begin
+        else if(cur_trd == 3 & !stall) begin
             nxt_pc_3 = cur_pc + 1;
             pc_wr[3] = 1;
         end
@@ -130,11 +131,11 @@ module pc_sel
             nxt_pc_4 = i_miss_pc;
             pc_wr[4] = 1;
         end
-        else if(jmp_trd == 4 & jmp) begin
+        else if(jmp_trd == 4 & jmp & !stall) begin
             nxt_pc_4 = jmp_pc;
             pc_wr[4] = 1;
         end
-        else if(cur_trd == 4) begin
+        else if(cur_trd == 4 & !stall) begin
             nxt_pc_4 = cur_pc + 1;
             pc_wr[4] = 1;
         end
@@ -148,11 +149,11 @@ module pc_sel
             nxt_pc_5 = i_miss_pc;
             pc_wr[5] = 1;
         end
-        else if(jmp_trd == 5 & jmp) begin
+        else if(jmp_trd == 5 & jmp & !stall) begin
             nxt_pc_5 = jmp_pc;
             pc_wr[5] = 1;
         end
-        else if(cur_trd == 5) begin
+        else if(cur_trd == 5 & !stall) begin
             nxt_pc_5 = cur_pc + 1;
             pc_wr[5] = 1;
         end
@@ -166,11 +167,11 @@ module pc_sel
             nxt_pc_6 = i_miss_pc;
             pc_wr[6] = 1;
         end
-        else if(jmp_trd == 6 & jmp) begin
+        else if(jmp_trd == 6 & jmp & !stall) begin
             nxt_pc_6 = jmp_pc;
             pc_wr[6] = 1;
         end
-        else if(cur_trd == 6) begin
+        else if(cur_trd == 6 & !stall) begin
             nxt_pc_6 = cur_pc + 1;
             pc_wr[6] = 1;
         end
@@ -184,14 +185,15 @@ module pc_sel
             nxt_pc_7 = i_miss_pc;
             pc_wr[7] = 1;
         end
-        else if(jmp_trd == 7 & jmp) begin
+        else if(jmp_trd == 7 & jmp & !stall) begin
             nxt_pc_7 = jmp_pc;
             pc_wr[7] = 1;
         end
-        else if(cur_trd == 7) begin
+        else if(cur_trd == 7 & !stall) begin
             nxt_pc_7 = cur_pc + 1;
             pc_wr[7] = 1;
         end
+        
         if(jmp_exp & !exp_mode) begin
             case(cur_pc)
                 0: begin

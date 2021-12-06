@@ -16,6 +16,7 @@ module insdec
     input           [2:0]   trd_dec         ,
     input           [31:0]  pc_dec          ,
     input                   flushID         ,
+    input                   stall           ,
 
     input           [2:0]   wr_trd_wb       ,
     input           [31:0]  data_wb         ,
@@ -119,7 +120,7 @@ module insdec
             new_trd_exe     <= 0;
             trd_exe         <= 0;
         end
-        else begin
+        else if(!stall) begin
             trd_exe         <= trd_dec;
             pc_exe          <= pc_dec;
             ins_exe         <= ins_dec;
