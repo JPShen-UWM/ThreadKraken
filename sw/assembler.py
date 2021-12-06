@@ -392,7 +392,7 @@ class Assembler:
     # slp 
     # slp ra   | sleep thread
     def _slp(cmd):
-      OPCODE = '1011110'
+      OPCODE = '1010110'
 
       args = re.split(',| ', cmd)
       [_, ra] = [_ for _ in args if len(_) > 0]
@@ -405,7 +405,7 @@ class Assembler:
     # kill
     # kill ra   | kill thread ra
     def _kill(cmd):
-      OPCODE = '0001110'
+      OPCODE = '0000110'
 
       args = re.split(',| ', cmd)
       [_, ra] = [_ for _ in args if len(_) > 0]
@@ -418,7 +418,7 @@ class Assembler:
     # wake
     # wake ra   |wake up thread ra
     def _wk(cmd):
-      OPCODE = '0101110'
+      OPCODE = '0100110'
 
       args = re.split(',| ', cmd)
       [_, ra] = [_ for _ in args if len(_) > 0]
@@ -431,7 +431,7 @@ class Assembler:
     # nt   -> new thread
     # nt rd,ra,rb
     def _nt(cmd):
-      OPCODE = '1111110'
+      OPCODE = '1110110'
 
       args = re.split(',| ', cmd)
       [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
