@@ -1,0 +1,4 @@
+line 0     cmd: addi r21 r0 0xFF              binary/hex: a803fcdc 
+line 1     cmd: addi r22 r0 0x1               binary/hex: b00004dc 
+line 2     cmd: add r23 r21 r22               binary/hex: bd6c00de 
+line 3     cmd: kill r0                       binary/hex: 0000001c 

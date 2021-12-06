@@ -388,9 +388,66 @@ class Assembler:
         imm = imm_to_bin(imm, IMM_LEN, mode=1) # can be neg
       
       return l_ext(rb,5) + l_ext(ra,5) + imm + '0'*2 + OPCODE + '0' 
+    
+    # slp 
+    # slp ra   | sleep thread
+    def _slp(cmd):
+      OPCODE = '1011110'
+
+      args = re.split(',| ', cmd)
+      [_, ra] = [_ for _ in args if len(_) > 0]
+      if ra[0] != 'r':
+        raise Exception('Unrecognized arguments...')
+      
+      ra = bin(int(ra[1:]))
+      return '0'*5 + l_ext(ra,5)+ '0'*14 + OPCODE + '0'
+
+    # kill
+    # kill ra   | kill thread ra
+    def _kill(cmd):
+      OPCODE = '0001110'
+
+      args = re.split(',| ', cmd)
+      [_, ra] = [_ for _ in args if len(_) > 0]
+      if ra[0] != 'r':
+        raise Exception('Unrecognized arguments...')
+      
+      ra = bin(int(ra[1:]))
+      return '0'*5 + l_ext(ra,5)+ '0'*14 + OPCODE + '0'
+
+    # wake
+    # wake ra   |wake up thread ra
+    def _wk(cmd):
+      OPCODE = '0101110'
+
+      args = re.split(',| ', cmd)
+      [_, ra] = [_ for _ in args if len(_) > 0]
+      if ra[0] != 'r':
+        raise Exception('Unrecognized arguments...')
+      
+      ra = bin(int(ra[1:]))
+      return '0'*5 + l_ext(ra,5)+ '0'*14 + OPCODE + '0'
+
+    # nt   -> new thread
+    # nt rd,ra,rb
+    def _nt(cmd):
+      OPCODE = '1111110'
+
+      args = re.split(',| ', cmd)
+      [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
+      if rd[0] != 'r' or ra[0] != 'r' or rb[0] != 'r':
+        raise Exception('Unrecognized arguments...')
+      rd,ra,rb = bin(int(rd[1:])),bin(int(ra[1:])),bin(int(rb[1:]))
+      
+      return l_ext(rd,5) + l_ext(ra,5) + l_ext(rb,5) + '0'*9 + OPCODE + '0'
+
+    
+      
+
+
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
-    'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt']
+    'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt', 'slp', 'wk', 'kill','nt']
 
     func_map = {
       'add': _add, 
@@ -412,7 +469,11 @@ class Assembler:
       'jalr': _jalr, 
       'beq': _beq, 
       'bneq': _bneq, 
-      'blt': _blt
+      'blt': _blt,
+      'slp': _slp,
+      'wk': _wk,
+      'kill': _kill,
+      'nt': _nt
     }
     
     def __init__(self):
