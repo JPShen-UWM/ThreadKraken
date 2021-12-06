@@ -5,3 +5,5 @@
 *.bak
 *.vscode
 rtl/work
+*.o
+*.ref
