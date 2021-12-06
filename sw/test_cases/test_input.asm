@@ -26,4 +26,7 @@ beq r1,r4, 45
 JAL r1, .why
 beq r0,r1, .gg
 
+slp r3
+nt r0 r1 r2
+
 
