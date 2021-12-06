@@ -43,7 +43,7 @@ module alu(
     logic [31:0] cal_out;
     logic [31:0] dif;
 
-
+    assign alu_out = cal_out;
 
     // Input select
     assign sign_ext = alu_op == 3'b110;

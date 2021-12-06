@@ -45,6 +45,7 @@ module mem(
 
     assign d_rd = mem_ctrl_mem[0];
     assign d_wr = mem_ctrl_mem[1];
+    assign d_wr_data = exe_data_mem;
     
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n | flushMEM) begin

@@ -31,6 +31,8 @@ module insfetch
     input       [2:0]       obj_trd     ,
     input       [31:0]      init_pc     ,
     input                   stall       ,
+    input                   jmp_exp     ,
+    input                   return_op   ,
 
     output  logic   [31:0]  pc_dec      ,
     output  logic   [2:0]   new_trd     ,
@@ -62,10 +64,14 @@ module insfetch
     logic [7:0] pc_wr;
     logic [7:0] trd_miss;
     logic [2:0] cur_trd;
-    logic exp_mode, jmp_exp, return_op;
+    logic exp_mode;
     logic [2:0] nxt_trd;
 
+    assign trd_if = cur_trd;
 
+    assign flushID = 0;
+    assign flushEX = 0;
+    assign flushMEM = 0;
     // Thread miss
     always_comb begin
         trd_miss = 0;

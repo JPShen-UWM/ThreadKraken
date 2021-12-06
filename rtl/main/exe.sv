@@ -47,7 +47,6 @@ module exe(
     output  logic   [2:0]   obj_trd_mem ,
 
     output  logic   [31:0]  jmp_pc_exe  ,
-    output  logic   [2:0]   jmp_trd_exe ,
     output  logic           jmp_en_exe  ,
     output  logic           stall_exe   ,   // Stall because data hazard
     
@@ -60,6 +59,7 @@ module exe(
 
     assign exe_data_exe = init_trd_exe? {29'b0, new_trd_exe}:
                          &jmp_con_exe[2:0]? pc_exe:
+                         mem_ctrl_exe[1]? data_b_for:
                          alu_out_exe;
 
 
@@ -75,13 +75,13 @@ module exe(
                 end
             end
             else begin
-                if(reg_rd_a_exe == reg_wr_mem) data_a_for = exe_data_mem;
-                if(reg_rd_b_exe == reg_wr_mem) data_b_for = exe_data_mem;
+                if(reg_rd_a_exe == reg_wr_mem & |reg_wr_mem) data_a_for = exe_data_mem;
+                if(reg_rd_b_exe == reg_wr_mem & |reg_wr_mem) data_b_for = exe_data_mem;
             end
         end
         else if(trd_mem == trd_wb & wr_en_wb) begin
-            if(reg_rd_a_exe == reg_wr_wb) data_a_for = wb_data_wb;
-            if(reg_rd_b_exe == reg_wr_wb) data_b_for = wb_data_wb;
+            if(reg_rd_a_exe == reg_wr_wb & |reg_wr_wb) data_a_for = wb_data_wb;
+            if(reg_rd_b_exe == reg_wr_wb & |reg_wr_wb) data_b_for = wb_data_wb;
         end
     end
     alu ALU(
