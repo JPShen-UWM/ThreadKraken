@@ -1,12 +1,12 @@
 /*
- * Module name: no_miss_mem
+ * Module name: miss_mem
  * Engineer: Jianping Shen
- * Description: Mimic memory with no cache miss
+ * Description: Mimic memory with cache miss in first access
  * Dependency:
  * Status: Developing
 **/
 `include "../main/header.svh"
-module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
+module miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
 (
     input                   clk         ,
     input                   rst_n       ,
@@ -51,6 +51,7 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
 );
 
     logic [31:0] mem[4095:0];
+    logic [255:0] valid;
     logic loaded;
     logic [11:0] i_phy_addr;
     logic [11:0] d_phy_addr;
@@ -68,56 +69,58 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
 
     logic [31:0] d_rd_sel;
     logic d_seg_sel;
+    logic d_miss_sel;
     always_comb begin
         d_rd_sel = 0;
         d_seg_sel = 0;
+        d_miss_sel = 0;
         if(|d_addr[31:16] & (d_rd | d_wr)) begin
             case(d_trd)
                 0: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'hE| d_phy_addr[11:8] == 4'hF) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 1: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'hD) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 2: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'hC) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 3: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'hB) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 4: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'hA) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 5: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'h9) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 6: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'h8) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
                 7: begin
                     if(d_phy_addr[11:8] <=5 | d_phy_addr[11:8] == 4'h7) begin
-                        d_rd_sel = mem[d_phy_addr];
+                        if(valid[d_phy_addr[11:4]]) d_rd_sel = mem[d_phy_addr];
                     end
                     else d_seg_sel = 1;
                 end
@@ -134,6 +137,7 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
             d_rd_data   <= 0;
             d_miss      <= 0;
             d_segfault  <= 0;
+            valid       <= 0;
             if(!loaded) begin
                 $readmemh(test_path, mem, 12'h100);
                 loaded = 1;
@@ -141,19 +145,41 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
             end
         end
         else begin
-            if(i_rd) i_rd_data <= mem[i_phy_addr];
-            else i_rd_data <= 0;
+            if(i_rd) begin
+                i_miss <= !valid[i_phy_addr[11:4]];
+                if(valid[i_phy_addr[11:4]]) i_rd_data <= mem[i_phy_addr];
+                else begin
+                    i_rd_data <= 0;
+                    valid[i_phy_addr[11:4]] <= 1;
+                end
+            end
+            else begin
+                i_rd_data <= 0;
+                i_miss <= 0;
+            end
             if(d_rd) begin 
+                d_miss <= !valid[d_phy_addr[11:4]];
                 d_rd_data <= mem[d_phy_addr];
                 d_segfault <= d_seg_sel;
+                valid[d_phy_addr[11:4]] <= 1;
             end
             else if(d_wr) begin
                 if(d_seg_sel) d_segfault <= d_seg_sel;
                 else begin
-                    $display("Mem write. Thread: %d, addr: %h, data: %h", d_trd, d_addr, d_wr_data);
-                    mem[d_phy_addr] <= d_wr_data;
+                    if(valid[d_phy_addr[11:4]]) begin
+                        $display("Mem write. Thread: %d, addr: %h, data: %h", d_trd, d_addr, d_wr_data);
+                        mem[d_phy_addr] <= d_wr_data;
+                    end
+                    else begin
+                        d_miss <= 1;
+                        valid[d_phy_addr[11:4]] <= 1;
+                    end
                 end
                 d_rd_data <= 0;
+            end
+            else begin
+                d_rd_data <= 0;
+                d_miss <= 0;
             end
         end
     end

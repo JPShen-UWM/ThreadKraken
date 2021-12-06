@@ -70,7 +70,7 @@ module insfetch
     always_comb begin
         trd_miss = 0;
         trd_miss[trd_dec] = i_miss;
-        trd_miss[d_miss_trd] = d_miss;
+        trd_miss[d_miss_trd] = d_miss | i_miss & trd_dec == d_miss_trd;
         miss = i_miss | d_miss;
     end
 
@@ -164,6 +164,7 @@ module insfetch
         .exp_mode       (exp_mode   ),
         .return_op      (return_op  ),
         .stall          (stall      ),
+        .i_rd           (i_rd       ),
 
         .nxt_pc_0       (nxt_pc_0   ),
         .nxt_pc_1       (nxt_pc_1   ),
