@@ -254,7 +254,7 @@ class Assembler:
       rd = bin(int(rd[1:]))
       imm = imm_to_bin(imm, IMM_LEN) # default mode 0
       
-      return l_ext(rd,5) + imm + '0'*3 + OPCODE + '0' 
+      return l_ext(rd,5) + '0' + imm + '0'*2 + OPCODE + '0' 
 
     # slbi
     # sLBI rd, imm    |     rd = (rd << 16) | imm
@@ -270,7 +270,7 @@ class Assembler:
       rd = bin(int(rd[1:]))
       imm = imm_to_bin(imm, IMM_LEN) # default mode 0
       
-      return l_ext(rd,5) + imm + '0'*3 + OPCODE + '0' 
+      return l_ext(rd,5) + '0' + imm + '0'*2 + OPCODE + '0' 
 
     # st
     # ST ra, rb, imm     |     M[ra + imm] = rb
