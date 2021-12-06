@@ -9,7 +9,7 @@
 module top_level_tb();
     parameter mem_miss = 0; // 1 to simulate cache miss
     parameter test_path = "../sw/test_cases/add1.o";
-    parameter MAX_CYCLE = 10;
+    parameter MAX_CYCLE = 20;
 
 
     logic           clk         ;
@@ -55,11 +55,22 @@ module top_level_tb();
     logic reg_wr_en;
     logic [2:0] trd_wr;
     logic [31:0] data_wr;
+    logic [2:0] new_trd;
+    logic kill, sleep, wake, init;
+    logic [2:0] obj_trd, act_trd, par_trd;
 
     assign reg_wr = DUT.reg_wr_wb;
     assign reg_wr_en = DUT.wr_en_wb;
     assign data_wr = DUT.wb_data_wb;
     assign trd_wr = DUT. trd_wb;
+    assign kill = DUT.kill;
+    assign sleep = DUT.sleep;
+    assign wake = DUT.wake;
+    assign init = DUT.INSFETCH.THREAD_CTRL.init;
+    assign new_trd = DUT.new_trd_id;
+    assign obj_trd = DUT.obj_trd_wb;
+    assign act_trd = DUT.trd_wb;
+    assign par_trd = DUT.trd_dec;
 
     initial begin
         cycle_count = 0;
@@ -71,9 +82,6 @@ module top_level_tb();
         @(negedge clk);  
         for(cycle_count = 0; cycle_count < MAX_CYCLE; cycle_count++) begin
             @(posedge clk);
-            if(reg_wr_en) begin
-                $display("Reg write. Thread: %d, reg: %d, data:%h", trd_wr, reg_wr, data_wr);
-            end
             if(rst_n & !running) begin
                 $display("Processor stop running at cycle: %d.", cycle_count);
                 $stop;
@@ -83,10 +91,30 @@ module top_level_tb();
         $stop;
     end
 
+    always @(posedge clk) begin
+        if(rst_n) begin
+            if(reg_wr_en) begin
+                $display("Reg write. Thread: %d, reg: %d, data:%h", trd_wr, reg_wr, data_wr);
+            end
+            if(init) begin
+                $display("Init. Thread: %d, init new trd: %d", par_trd, new_trd);
+            end
+            if(kill) begin
+                $display("Thread: %d kill thread %d.", act_trd, obj_trd);
+            end
+            if(sleep) begin
+                $display("Thread: %d sleep thread %d.", act_trd, obj_trd);
+            end
+            if(wake) begin
+                $display("Thread: %d wake thread %d.", act_trd, obj_trd);
+            end
+        end
+    end
+
     always #5 clk = ~clk;
 
     generate
-    no_miss_mem #("../sw/test_cases/add1.o") NO_MISS_MEM 
+    no_miss_mem #("../sw/test_cases/mem1.o") NO_MISS_MEM 
     (
         .clk            (clk         ),
         .rst_n          (rst_n       ),

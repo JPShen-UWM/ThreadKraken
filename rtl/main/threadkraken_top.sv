@@ -91,7 +91,7 @@ module threadkraken_top(
     // immediate type control
     logic i_type_exe;
     // stall for data hazard
-    logic stall;
+    logic stall, stall_req;
 
     assign i_trd = trd_if;
     assign d_trd = trd_mem;
@@ -131,9 +131,7 @@ module threadkraken_top(
         .new_trd            (new_trd_id     ),
         .trd_if             (trd_if         ),
         .trd_dec            (trd_dec        ),
-        .flushID            (flushID        ),
-        .flushEX            (flushEX        ),
-        .flushMEM           (flushMEM       ),
+        .flushIF            (flushIF        ),
         .trd_of             (trd_of         ),
         .trd_full           (trd_full       ),
         .run_trd            (run_trd        ),
@@ -150,6 +148,25 @@ module threadkraken_top(
         .child_7            (child_7        )  
     );
 
+    flush_stall FLUSH_STALL(
+        .jmp        (jmp_en     ),
+        .kill       (kill       ),
+        .sleep      (sleep      ),
+        .stall_req  (stall_req  ),
+        .trd_if     (trd_if     ),
+        .trd_dec    (trd_dec    ),
+        .trd_exe    (trd_exe    ),
+        .trd_mem    (trd_mem    ),
+        .trd_wb     (trd_wb     ),
+        .d_miss     (d_miss     ),
+        .flushEX    (flushEX    ),
+        .flushID    (flushID    ),
+        .flushMEM   (flushMEM   ),
+        .flushIF    (flushIF    ),
+        .stall      (stall      )
+    );
+
+
     insdec INSDEC
     (
         .clk                (clk            ),
@@ -160,6 +177,7 @@ module threadkraken_top(
         .trd_dec            (trd_dec        ),
         .pc_dec             (pc_dec         ),
         .flushID            (flushID        ),
+        .stall              (stall          ),
 
         .wr_trd_wb          (trd_wb         ),
         .data_wb            (wb_data_wb     ),
@@ -211,6 +229,7 @@ module threadkraken_top(
         .trd_exe            (trd_exe        ),
         .wb_sel_exe         (wb_sel_exe     ),
         .flushEX            (flushEX        ),
+        .stall              (stall          ),
         .trd_wb             (trd_wb         ),
         .reg_wr_wb          (reg_wr_wb      ),
         .wb_data_wb         (wb_data_wb     ),
@@ -235,7 +254,7 @@ module threadkraken_top(
         .obj_trd_mem        (obj_trd_mem    ),
         .jmp_pc_exe         (jmp_pc         ),
         .jmp_en_exe         (jmp_en         ),
-        .stall_exe          (stall          ), 
+        .stall_exe          (stall_req      ), 
         .of_exe             (alu_exp        )
     );
 

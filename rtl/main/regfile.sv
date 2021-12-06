@@ -31,14 +31,14 @@ module regfile #( parameter TRD_ID = 0 )
     // Data write
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
-            data[0] <= 31'h000;
+            data[0] <= 32'h000;
             data[1] <= TRD_ID;
             for(int i = 2; i<32; i++) begin
-                data[i] <= 0;
+                data[i] <= 32'b0;
             end
         end
         else if(init & init_trd == TRD_ID) begin
-            data[0] <= 31'h000;
+            data[0] <= 32'h000;
             data[1] <= TRD_ID;
             case(TRD_ID)
                 0: data[2] <= TRD0_INIT_ESP;

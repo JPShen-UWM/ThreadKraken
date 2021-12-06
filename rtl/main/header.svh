@@ -16,7 +16,7 @@ parameter LOADI     =   4'b1001;
 parameter MEMOP     =   4'b1000;
 parameter BRANCH    =   4'b1010;
 parameter EXC       =   4'b0000;
-parameter MULTI     =   4'b1110;
+parameter MULTI     =   4'b0110;
 
 // Function code
 parameter ADD       =   3'b110;

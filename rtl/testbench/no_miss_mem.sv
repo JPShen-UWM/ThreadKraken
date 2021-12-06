@@ -137,7 +137,7 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
             if(!loaded) begin
                 $readmemh(test_path, mem, 12'h100);
                 loaded = 1;
-                $display("Loaded memory.\n");
+                $display("Loaded memory. Load: %s", test_path);
             end
         end
         else begin
@@ -150,7 +150,7 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
             else if(d_wr) begin
                 if(d_seg_sel) d_segfault <= d_seg_sel;
                 else begin
-                    $display("Mem write. Thread: %d, addr: %h, data: %h\n", d_trd, d_addr, d_wr_data);
+                    $display("Mem write. Thread: %d, addr: %h, data: %h", d_trd, d_addr, d_wr_data);
                     mem[d_phy_addr] <= d_wr_data;
                 end
                 d_rd_data <= 0;
