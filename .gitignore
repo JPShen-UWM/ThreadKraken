@@ -5,3 +5,4 @@
 *.bak
 *.vscode
 rtl/work
+sw/test_cases/__pycache__
