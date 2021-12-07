@@ -1,5 +1,6 @@
 import copy
 import re
+from assembler import imm_to_bin
 
 IDLE = 0
 RUNNABLE = 1
@@ -25,11 +26,11 @@ def str_to_int(str):
     return int(str,16)
   return int(str)
 
-def twos_comp(val, bits):
-    """compute the 2's complement of int value val"""
-    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
-        val = val - (1 << bits)        # compute negative value
-    return val                         # return positive value as is
+# def twos_comp(val, bits):
+#     """compute the 2's complement of int value val"""
+#     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+#         val = val - (1 << bits)        # compute negative value
+#     return val                         # return positive value as is
 
 
 class Simulator:
@@ -48,7 +49,8 @@ class Simulator:
       
       rd,ra = int(rd[1:]),int(ra[1:])
 
-      thrd.regs[rd] = ~thrd.regs[ra]
+      print("not: ", ~thrd.regs[ra], thrd.regs[ra])
+      thrd.regs[rd] = ~(thrd.regs[ra] & 0xFFFFFFFF)
       return
 
     def _and(thrd, cmd):
@@ -85,9 +87,21 @@ class Simulator:
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
       rd,ra= int(rd[1:]),int(ra[1:])
-      imm = twos_comp(str_to_int(imm), IMM_LEN)
+      imm = str_to_int(imm)
 
       thrd.regs[rd] = thrd.regs[ra] + imm
+      return
+
+    def _andi(thrd, cmd):
+      IMM_LEN = 12
+
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      thrd.regs[rd] = thrd.regs[ra] & imm
       return
 
     def _lbi(thrd, cmd):
@@ -118,7 +132,7 @@ class Simulator:
       'or': _or,
       'xor': _xor, 
       'addi': _addi, 
-      # 'andi': _andi, 
+      'andi': _andi, 
       # 'ori': _ori, 
       # 'xori': _xori,
       # 'shlt': _shlt, 
@@ -230,7 +244,7 @@ class Simulator:
 
 
 class Thread:
-    def __init__(self, id = 0, pc=0, stack=[], regs = [0]*32, parent = None):
+    def __init__(self, id = 0, pc=0, stack=[], regs = [0x00000000]*32, parent = None):
       self.id = id
       self.stack = copy.deepcopy(stack)
       self.pc = copy.deepcopy(pc)
@@ -270,9 +284,10 @@ if __name__ == '__main__':
   s = Simulator()
   s.run('./test_cases/test_input.asm')
 
-  x = '0xF0'
-  x = twos_comp(str_to_int(x), 12)
-  print(x)
+  a = 255
+  b = -7
+  print(hex(b))
+  print(hex(a&b))
   
 
 

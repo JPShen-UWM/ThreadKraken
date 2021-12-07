@@ -1,7 +1,7 @@
 .gg
 add r1, r2, r3
-// adda r3, r2, r1
-// not r5, r10
+addi r3, r2, 0xFF
+not r5, r10
 // and r1,r2,r3
 // or r1,r4,r16
 // xor r5, r6 ,r18
