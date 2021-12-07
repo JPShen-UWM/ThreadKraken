@@ -70,12 +70,12 @@ module insfetch
     always_comb begin
         trd_miss = 0;
         trd_miss[trd_dec] = i_miss;
-        trd_miss[d_miss_trd] = d_miss;
+        trd_miss[d_miss_trd] = d_miss | i_miss & trd_dec == d_miss_trd;
         miss = i_miss | d_miss;
     end
 
     assign i_addr = pc_if;
-    assign i_rd = run_trd[cur_trd];
+    assign i_rd = run_trd[cur_trd] & !flushIF;
     assign atomic = i_data[0] | exp_mode;
 
     // Exception mode
@@ -164,6 +164,7 @@ module insfetch
         .exp_mode       (exp_mode   ),
         .return_op      (return_op  ),
         .stall          (stall      ),
+        .i_rd           (i_rd       ),
 
         .nxt_pc_0       (nxt_pc_0   ),
         .nxt_pc_1       (nxt_pc_1   ),
