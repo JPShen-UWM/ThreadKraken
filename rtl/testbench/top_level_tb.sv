@@ -156,7 +156,7 @@ module top_level_tb();
             );
         end
         else begin
-            miss_mem #("../sw/test_cases/beq2.o") MISS_MEM 
+            miss_mem #("../sw/test_cases/mem2.o") MISS_MEM 
             (
                 .clk            (clk         ),
                 .rst_n          (rst_n       ),
