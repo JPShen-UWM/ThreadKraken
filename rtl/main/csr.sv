@@ -35,7 +35,7 @@
 
 /*
  *  [    31     | 30 -------------------- 14 | 13 ---------- 6 | 5 -------- 0 ]
- *  [ csr_stall |          reserved          |    thread id    |    ex code   ]
+ *  [ csr_stall |          reserved          |     child id    |    ex code   ]
  */
     logic [31:0]        ctrl_reg;           // 32-bit csr
     
