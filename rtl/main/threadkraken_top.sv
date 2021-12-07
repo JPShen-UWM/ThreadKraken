@@ -65,12 +65,12 @@ module threadkraken_top(
     // New thread
     logic [2:0] new_trd_id, new_trd_exe;
     // Flush
-    logic flushID, flushEX, flushMEM;
+    logic flushID, flushEX, flushMEM, flushWB;
     // Register read and write
     logic [31:0] data_a_exe, data_b_exe;
     logic [4:0] reg_rd_a_exe, reg_rd_b_exe;
     logic [4:0] reg_wr_exe, reg_wr_mem, reg_wr_wb;
-    logic wr_en_exe, wr_en_mem, wr_en_wb;
+    logic wr_en_exe, wr_en_mem, wr_en_wb, wr_en_final;
     // Data at each stage
     logic [31:0] exe_data_mem, exe_data_wb;
     logic [31:0] wb_data_wb;
@@ -111,8 +111,8 @@ module threadkraken_top(
         .jmp_pc             (jmp_pc         ),
         .jmp                (jmp_en         ),
         .d_miss             (d_miss         ),
-        .d_miss_pc          (pc_mem         ),
-        .d_miss_trd         (trd_mem        ),
+        .d_miss_pc          (pc_wb          ),
+        .d_miss_trd         (trd_wb         ),
         .i_data             (i_rd_data      ),
         .i_miss             (i_miss         ),
         .i_segfault         (i_segfault     ),
@@ -163,6 +163,7 @@ module threadkraken_top(
         .flushID    (flushID    ),
         .flushMEM   (flushMEM   ),
         .flushIF    (flushIF    ),
+        .flushWB    (flushWB    ),
         .stall      (stall      )
     );
 
@@ -182,7 +183,7 @@ module threadkraken_top(
         .wr_trd_wb          (trd_wb         ),
         .data_wb            (wb_data_wb     ),
         .wr_reg_wb          (reg_wr_wb      ),
-        .wr_en_wb           (wr_en_wb       ),
+        .wr_en_final        (wr_en_final    ),
 
         // Register         
         .data_a_exe         (data_a_exe     ),
@@ -296,11 +297,14 @@ module threadkraken_top(
         .trd_ctrl_wb        (trd_ctrl_wb    ),
         .wb_sel_wb          (wb_sel_wb      ),
         .d_rd_data          (d_rd_data      ),
+        .flushWB            (flushWB        ),
+        .wr_en_wb           (wr_en_wb       ),
 
         .wb_data_wb         (wb_data_wb     ),
         .kill               (kill           ),
         .sleep              (sleep          ),
-        .wake               (wake           )
+        .wake               (wake           ),
+        .wr_en_final        (wr_en_final    )
     );
 
 endmodule

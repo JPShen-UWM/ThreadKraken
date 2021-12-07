@@ -61,7 +61,7 @@ module no_miss_mem #( parameter test_path = "../../sw/test_cases/add1.o" )
 
     initial begin
         loaded = 0;
-        for (int i = 0; i< 4095; i=i+1) begin
+        for (int i = 0; i< 4096; i=i+1) begin
             mem[i] = 0;
         end
     end

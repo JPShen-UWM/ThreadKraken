@@ -27,6 +27,7 @@ module pc_sel
     input                   exp_mode    ,
     input                   return_op   ,
     input                   stall       ,
+    input                   i_rd        ,
 
     output  logic   [31:0]  nxt_pc_0    ,
     output  logic   [31:0]  nxt_pc_1    ,
@@ -65,7 +66,7 @@ module pc_sel
         end
         else if(cur_trd == 0 & !stall) begin
             nxt_pc_0 = cur_pc + 1;
-            pc_wr[0] = 1;
+            pc_wr[0] = i_rd;
         end
 
         // Thread 1
@@ -83,7 +84,7 @@ module pc_sel
         end
         else if(cur_trd == 1 & !stall) begin
             nxt_pc_1 = cur_pc + 1;
-            pc_wr[1] = 1;
+            pc_wr[1] = i_rd;
         end
 
         // Thread 2
@@ -101,7 +102,7 @@ module pc_sel
         end
         else if(cur_trd == 2 & !stall) begin
             nxt_pc_2 = cur_pc + 1;
-            pc_wr[2] = 1;
+            pc_wr[2] = i_rd;
         end
 
         // Thread 3
@@ -119,7 +120,7 @@ module pc_sel
         end
         else if(cur_trd == 3 & !stall) begin
             nxt_pc_3 = cur_pc + 1;
-            pc_wr[3] = 1;
+            pc_wr[3] = i_rd;
         end
 
         // Thread 4
@@ -137,7 +138,7 @@ module pc_sel
         end
         else if(cur_trd == 4 & !stall) begin
             nxt_pc_4 = cur_pc + 1;
-            pc_wr[4] = 1;
+            pc_wr[4] = i_rd;
         end
 
         // Thread 5
@@ -155,7 +156,7 @@ module pc_sel
         end
         else if(cur_trd == 5 & !stall) begin
             nxt_pc_5 = cur_pc + 1;
-            pc_wr[5] = 1;
+            pc_wr[5] = i_rd;
         end
 
         // Thread 6
@@ -173,7 +174,7 @@ module pc_sel
         end
         else if(cur_trd == 6 & !stall) begin
             nxt_pc_6 = cur_pc + 1;
-            pc_wr[6] = 1;
+            pc_wr[6] = i_rd;
         end
 
         // Thread 7
@@ -191,7 +192,7 @@ module pc_sel
         end
         else if(cur_trd == 7 & !stall) begin
             nxt_pc_7 = cur_pc + 1;
-            pc_wr[7] = 1;
+            pc_wr[7] = i_rd;
         end
         
         if(jmp_exp & !exp_mode) begin

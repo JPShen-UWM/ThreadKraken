@@ -90,7 +90,7 @@ module alu(
                      (alu_op == XOR)? xor_r:
                      (alu_op == NOT)? ~Ain:
                      (alu_op == SHLT)? (i_type? {16'b0, imm}: shlt4):
-                     (alu_op == SHRT)? (i_type? {Ain[15:0], imm}: shrt4):
+                     (alu_op == SHRT)? (i_type? {Bin[15:0], imm}: shrt4):
                      (alu_op == SHAR)? shar4: 32'h0;
 
     assign dif = Ain - b_sel;

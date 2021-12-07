@@ -177,8 +177,14 @@ module thread_ctrl(
 
     // Thread pointer
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n) cur_trd_tmp <= 0;
-        else cur_trd_tmp <= nxt_trd;
+        if(!rst_n) begin
+            last_trd <= 0;
+            cur_trd_tmp <= 0;
+        end
+        else begin
+            last_trd <= cur_trd;
+            cur_trd_tmp <= nxt_trd;
+        end
     end
 
     // Initial init
