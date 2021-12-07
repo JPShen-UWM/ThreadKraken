@@ -8,7 +8,7 @@
 `include "../main/header.svh"
 module top_level_tb();
     parameter mem_miss = 1; // 1 to simulate cache miss
-    parameter test_path = "../sw/test_cases/add1.o";
+    //parameter test_path = "../sw/test_cases/add1.o";
     parameter MAX_CYCLE = 200;
 
 
@@ -115,7 +115,7 @@ module top_level_tb();
 
     generate
         if(!mem_miss) begin
-            no_miss_mem #("../sw/test_cases/shlt.o") NO_MISS_MEM 
+            no_miss_mem #("../sw/test_cases/jal1.o") NO_MISS_MEM 
             (
                 .clk            (clk         ),
                 .rst_n          (rst_n       ),
@@ -156,7 +156,7 @@ module top_level_tb();
             );
         end
         else begin
-            miss_mem #("../sw/test_cases/mem1.o") MISS_MEM 
+            miss_mem #("../sw/test_cases/beq2.o") MISS_MEM 
             (
                 .clk            (clk         ),
                 .rst_n          (rst_n       ),

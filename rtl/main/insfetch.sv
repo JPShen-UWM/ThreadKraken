@@ -75,7 +75,7 @@ module insfetch
     end
 
     assign i_addr = pc_if;
-    assign i_rd = run_trd[cur_trd];
+    assign i_rd = run_trd[cur_trd] & !flushIF;
     assign atomic = i_data[0] | exp_mode;
 
     // Exception mode
