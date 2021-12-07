@@ -26,6 +26,15 @@ def str_to_int(str):
     return int(str,16)
   return int(str)
 
+def invert(str):
+  ret = ''
+  for c in str:
+    if c == '0':
+      ret += '1'
+    else:
+      ret += '0'
+  return ret
+
 # def twos_comp(val, bits):
 #     """compute the 2's complement of int value val"""
 #     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
@@ -50,7 +59,8 @@ class Simulator:
       rd,ra = int(rd[1:]),int(ra[1:])
 
       print("not: ", ~thrd.regs[ra], thrd.regs[ra])
-      thrd.regs[rd] = ~(thrd.regs[ra] & 0xFFFFFFFF)
+      thrd.regs[rd] = int(invert(imm_to_bin(str(thrd.regs[ra]), 32, 1)),2)
+      print(thrd.regs[rd])
       return
 
     def _and(thrd, cmd):
@@ -286,8 +296,8 @@ if __name__ == '__main__':
 
   a = 255
   b = -7
-  print(hex(b))
-  print(hex(a&b))
+  print(hex(a),hex(b))
+  print(imm_to_bin('-0x1', 32,1))
   
 
 
