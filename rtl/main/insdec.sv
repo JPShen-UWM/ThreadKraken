@@ -21,7 +21,7 @@ module insdec
     input           [2:0]   wr_trd_wb       ,
     input           [31:0]  data_wb         ,
     input           [4:0]   wr_reg_wb       ,
-    input                   wr_en_wb        ,
+    input                   wr_en_final     ,
 
     // Register 
     output  logic   [31:0]  data_a_exe      ,
@@ -91,8 +91,8 @@ module insdec
         .reg_rd_a    (reg_rd_a    ),
         .reg_rd_b    (reg_rd_b    ),
         .wr_trd      (wr_trd_wb   ),
-        .reg_wr      (reg_wr      ),
-        .wr_en       (wr_en       ),
+        .reg_wr      (wr_reg_wb   ),
+        .wr_en       (wr_en_final ),
         .wr_data     (data_wb     ),
         .init        (init_trd_dec),
         .init_trd    (new_trd_id  ),

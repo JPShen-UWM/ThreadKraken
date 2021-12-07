@@ -43,8 +43,8 @@ module mem(
     // 01: read
     // 10: write
 
-    assign d_rd = mem_ctrl_mem[0];
-    assign d_wr = mem_ctrl_mem[1];
+    assign d_rd = mem_ctrl_mem[0] & !flushMEM;
+    assign d_wr = mem_ctrl_mem[1] & !flushMEM;
     assign d_wr_data = exe_data_mem;
     
     always_ff @(posedge clk, negedge rst_n) begin

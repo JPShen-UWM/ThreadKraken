@@ -9,7 +9,7 @@
 module top_level_tb();
     parameter mem_miss = 1; // 1 to simulate cache miss
     parameter test_path = "../sw/test_cases/add1.o";
-    parameter MAX_CYCLE = 100;
+    parameter MAX_CYCLE = 200;
 
 
     logic           clk         ;
@@ -60,7 +60,7 @@ module top_level_tb();
     logic [2:0] obj_trd, act_trd, par_trd;
 
     assign reg_wr = DUT.reg_wr_wb;
-    assign reg_wr_en = DUT.wr_en_wb;
+    assign reg_wr_en = DUT.wr_en_final;
     assign data_wr = DUT.wb_data_wb;
     assign trd_wr = DUT. trd_wb;
     assign kill = DUT.kill;

@@ -21,6 +21,7 @@ module flush_stall(
     output  logic           flushID,
     output  logic           flushMEM,
     output  logic           flushIF,
+    output  logic           flushWB,
     output  logic           stall
 );
 
@@ -30,11 +31,13 @@ module flush_stall(
         flushIF = 0;
         flushID = 0;
         stall = 0;
+        flushWB = 0;
         if(kill | sleep | d_miss) begin
             if(trd_if == trd_wb) flushIF = 1;
             if(trd_dec == trd_wb) flushID = 1;
             if(trd_exe == trd_wb) flushEX = 1;
             if(trd_mem == trd_wb) flushMEM = 1;
+            flushWB = 1;           
         end
         else if(jmp) begin
             if(trd_if == trd_exe) flushIF = 1;
