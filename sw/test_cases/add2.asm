@@ -1,10 +1,3 @@
-// Original test: ./ziliang/hw4/problem6/add_0.asm
-// Author: ziliang
-// Test source code follows
-
-
-//This mainly tests the forwarding problems that can happen
-//if people messed up passing values between their pipelines.
 
 lbi r22, 100	//load 100 into r22
 lbi r23, 99	//load 99 into r23
