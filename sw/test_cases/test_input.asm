@@ -11,10 +11,11 @@ addi r1, r1, 5
 // addi r3, r10, -0x7FF
 // addi r3, r10, 0x13
 // andi r5,r6, 0x0FF
-// ORI r7, r8, 0x03F
+ORI r0, r0, -1
 // xORI r7, r8, 0x26F
-// shlt r6,r16, 0x1F
-// shrt r18,r19, 0x04
+shlt r0,r0, 0xF
+addi r31, r31, -1
+shrt r31,r31, 0x04
 lbi r10, -5
 slbi r10, -7
 // sta r1,r31, 0x0FF

@@ -117,7 +117,6 @@ class Simulator:
       return
 
     def _addi(thrd, cmd):
-      IMM_LEN = 12
 
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
@@ -131,8 +130,6 @@ class Simulator:
       return
 
     def _andi(thrd, cmd):
-      IMM_LEN = 12
-
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -140,6 +137,63 @@ class Simulator:
       imm = str_to_int(imm)
 
       thrd.regs[rd] = thrd.regs[ra] & imm
+      return
+
+    def _ori(thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      thrd.regs[rd] = thrd.regs[ra] | imm
+      # print('ori result: ', bindigits(thrd.regs[rd],32))
+      return
+
+    def _xori(thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      thrd.regs[rd] = thrd.regs[ra] ^ imm
+      # print('xori result: ', bindigits(thrd.regs[rd],32))
+      return
+
+    def _shlt(thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      thrd.regs[rd] = thrd.regs[ra] << imm
+      print('shlt result: ', bindigits(thrd.regs[rd],32))
+      return
+
+    def _shrt(thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      # print('shrt before: ', bindigits(thrd.regs[rd],32))
+      thrd.regs[rd] = thrd.regs[ra] >> imm
+      # print('shrt result: ', bindigits(thrd.regs[rd],32))
+      return
+
+    def _shra(thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd,ra= int(rd[1:]),int(ra[1:])
+      imm = str_to_int(imm)
+
+      # print('shrt before: ', bindigits(thrd.regs[rd],32))
+      thrd.regs[rd] = thrd.regs[ra] >> imm
+      # print('shrt result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _lbi(thrd, cmd):
@@ -162,7 +216,7 @@ class Simulator:
       rd,imm = int(rd[1:]), str_to_int(imm)
 
       thrd.regs[rd] = (thrd.regs[rd] << 16) + imm
-      print('slbi result: ', bindigits(thrd.regs[rd],32))
+      # print('slbi result: ', bindigits(thrd.regs[rd],32))
       return
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
@@ -176,10 +230,10 @@ class Simulator:
       'xor': _xor, 
       'addi': _addi, 
       'andi': _andi, 
-      # 'ori': _ori, 
-      # 'xori': _xori,
-      # 'shlt': _shlt, 
-      # 'shrt': _shrt, 
+      'ori': _ori, 
+      'xori': _xori,
+      'shlt': _shlt, 
+      'shrt': _shrt, 
       # 'shra': _shra,
       'lbi': _lbi, 
       'slbi': _slbi,
