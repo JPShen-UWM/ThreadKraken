@@ -19,13 +19,19 @@ shra r31,r31, 0x04
 lbi r10, -5
 slbi r10, -7
 // sta r1,r31, 0x0FF
+lbi r1, 15
+jalr r0, r1, 1
+jal r0, 0
+lbi r2, 15
+beq r1, r2 1
 
 andi r1, r1, 0
 andi r2, r2, 0
 lbi r2, 0x77
 st r1,r2, 0x7FF
 ld r2,r1, 0x7FF
-// jal r0, 0x1FF
+.why
+addi r31, r31, 0xFF
 // jalr r31, r1, 0x234
 // 
 // .why
@@ -33,7 +39,7 @@ ld r2,r1, 0x7FF
 // 
 // JAL r1, .why
 // beq r0,r1, .gg
-// 
+addi r31, r31, 0xFF
 // slp r3
 // nt r0 r1 r2
 

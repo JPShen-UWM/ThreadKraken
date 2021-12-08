@@ -55,6 +55,20 @@ def full_adder(str1, str2):
     ret = tmp + ret
   return ret
 
+def twos_comp_less_than(num1, num2):
+  s1 = bindigits(num1, 32)
+  s2 = bindigits(num2, 32)
+
+  if s1[0] == '0' and s2[0] == '0':
+    return num1 < num2
+  elif s1[0] == '0' and s2[0] == '1':
+    return False
+  elif s1[0] == '1' and s2[0] == '0':
+    return True
+  else:
+    s1,s2 = int(invert(s1),2), int(invert(s2),2)
+    return s1 > s2
+
 
 # def twos_comp(val, bits):
 #     """compute the 2's complement of int value val"""
@@ -170,7 +184,7 @@ class Simulator:
       imm = str_to_int(imm)
 
       thrd.regs[rd] = thrd.regs[ra] << imm
-      print('shlt result: ', bindigits(thrd.regs[rd],32))
+      # print('shlt result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _shrt(thrd, cmd, mem=None):
@@ -247,7 +261,105 @@ class Simulator:
       thrd.regs[rd] = int(mem[addr],2) if mem[addr] != '' else 0
       # print(f'ld result: addr: {addr}, reg{rd}: {thrd.regs[rd]}', )
       return 
-    
+
+    # jal
+    # JAL rd, imm    |     PC = PC + 1 + imm; rd = PC + 1
+    def _jal(thrd, cmd, labels):
+      args = re.split(',| ', cmd)
+      [_, rd, imm] = [_ for _ in args if len(_) > 0]
+
+      rd = int(rd[1:])
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
+
+      # print(f'jal before: imm in int: {imm}, curPC: {thrd.pc}')
+      thrd.regs[rd] = thrd.pc + 1
+      thrd.pc += imm # add 1 is handled by execute_thread
+      # print(f'jal result: rd: {thrd.regs[rd]}, newPC: {thrd.pc + 1}')
+      return 
+
+    # jalr
+    # JALR rd, ra, imm     |    PC = ra + imm; rd = PC + 1
+    def _jalr(thrd, cmd, labels):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+
+      rd, ra  = int(rd[1:]), int(ra[1:])
+      imm = str_to_int(imm) # can be neg
+
+      print(f'jalr before: imm in int: {imm}, ra: {thrd.regs[ra]}, curPC: {thrd.pc}')
+      thrd.regs[rd] = thrd.pc + 1
+      thrd.pc = imm + thrd.regs[ra] - 1 # add 1 is handled by execute_thread
+      print(f'jalr result: rd: {thrd.regs[rd]}, newPC: {thrd.pc + 1}')
+      return 
+      
+    # beq 
+    # BEQ ra, rb, imm      |     PC = PC +1 + imm if (ra == rb)
+    def _beq(thrd, cmd, labels):
+      args = re.split(',| ', cmd)
+      [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
+
+      ra, rd = int(rd[1:]), int(ra[1:])
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
+
+      # print(f'beq before: imm in int: {imm}, curPC: {thrd.pc}')
+      if thrd.regs[rd] == thrd.regs[ra]:
+        thrd.pc += imm # add 1 is handled by execute_thread
+      # print(f'beq result:, newPC: {thrd.pc + 1}')
+      return 
+      
+    # bneq 
+    # BNEQ ra, rb, imm      |     PC = PC +1 + imm if (ra != rb)
+    def _bneq(thrd, cmd, labels):
+      args = re.split(',| ', cmd)
+      [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
+
+      ra, rd = int(rd[1:]), int(ra[1:])
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
+
+      # print(f'beq before: imm in int: {imm}, curPC: {thrd.pc}')
+      if thrd.regs[rd] != thrd.regs[ra]:
+        thrd.pc += imm # add 1 is handled by execute_thread
+      # print(f'beq result:, newPC: {thrd.pc + 1}')
+      return 
+      
+    # blt 
+    # BLT ra, rb, imm      |     PC = PC +1 + imm if (ra < rb)
+    def _blt(thrd, cmd, labels):
+      args = re.split(',| ', cmd)
+      [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
+
+      ra, rd = int(rd[1:]), int(ra[1:])
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
+
+      # print(f'beq before: imm in int: {imm}, curPC: {thrd.pc}')
+      if twos_comp_less_than(thrd.regs[ra],thrd.regs[rd]):
+        thrd.pc += imm # add 1 is handled by execute_thread
+      # print(f'beq result:, newPC: {thrd.pc + 1}')
+      return 
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
     'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt', 'slp', 'wk', 'kill','nt']
@@ -269,11 +381,11 @@ class Simulator:
       'slbi': _slbi,
       'st': _st, 
       'ld': _ld, 
-      # 'jal': _jal, 
-      # 'jalr': _jalr, 
-      # 'beq': _beq, 
-      # 'bneq': _bneq, 
-      # 'blt': _blt,
+      'jal': _jal, 
+      'jalr': _jalr, 
+      'beq': _beq, 
+      'bneq': _bneq, 
+      'blt': _blt,
       # 'slp': _slp,
       # 'wk': _wk,
       # 'kill': _kill,
@@ -330,7 +442,6 @@ class Simulator:
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
         
-        
         print(cur_thrd)
         # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
         # print(tmp)
@@ -347,16 +458,17 @@ class Simulator:
       # print('pc %d -> cmd %s' %(cmd[0], opcode))
       if opcode[-1] == 'a' and opcode[:-1] in Simulator.cmd_table:
         if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem, self.labels)
+          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(),  self.labels)
         else: 
           ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem)
         atomic = True
       else:
         if opcode in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.mem, self.labels)
+          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.labels)
         else:
           ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.mem)
-
+      
+      print(cmd.lower())
 
       thrd.pc += 1
       if thrd.pc >= len(self.instr):
@@ -412,9 +524,11 @@ if __name__ == '__main__':
   s = Simulator()
   s.run('./test_cases/test_input.asm')
 
-  # a = ''
-  print(s.mem)
-  # print(int(a,2))
+  a = int('0xFFFFF0FF',16)
+  b = int('0x0FFFFFF0',16)
+  # print(a)
+  # print(a<b)
+  # print(twos_comp_less_than(a,b))
   # b = 7
   # print(hex(a),hex(b))
   # a = bindigits(a,32)
