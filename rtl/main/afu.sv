@@ -122,8 +122,9 @@ module afu
 
    wire [31:0] cpu_in;
    wire [31:0] cpu_out; // Todo, parameterize
-
-   cpu
+    
+    // replace with top-level threadkraken module/MMU
+/*    cpu
    mock
    (
        .clk(clk),
@@ -135,7 +136,8 @@ module afu
        .common_data_bus_in(cpu_in),
        .common_data_bus_out(cpu_out),
        .cv_value(cv_value)
-   );
+   ); */
+   
 
    // Address Translation module
    addr_tr_unit

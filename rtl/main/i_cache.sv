@@ -16,7 +16,7 @@ module i_cache(
     input  logic        clk,
     input  logic        rst_n,
     input  logic [31:0] cur_pc,
-    input  logic [31:0] rd_ins[0:15],            // 32-bit cache line to read from memory
+    input  logic [31:0] wr_ins[0:15],            // 32-bit cache line to read from memory
     input  logic        wr_en,
     input  logic        rd_en,
     // input  logic       INT,             // from interrupt handler, int enable
@@ -30,10 +30,9 @@ module i_cache(
     logic [32:0]        mem[0:511];        // {valid,ins[31:0]}
     logic [8:0]         index;
     logic               seg_f_en;
-    // logic [511:0]               hit;      // this is probably stupid
     
 	// cache is large enough for everything in memory so only index bits
-    // assign index = cur_pc[8:0];
+    assign index = cur_pc[8:0];
 
     // cache read/write
     always_ff @(posedge clk, negedge rst_n)
@@ -42,10 +41,10 @@ module i_cache(
 			for(index = 0; index < 512; index = index + 1)
 				mem[index] <= 33'h0;
 		end
-		else if(rd_en && ~seg_f_en) begin
-			ins <= mem[cur_pc[8:0]][31:0];
+		else if(rd_en && i_cache_seg_fault) begin
+			ins <= mem[index][31:0];
 		end
-		else if(wr_en && ~seg_f_en) begin
+		else if(wr_en && i_cache_seg_fault) begin
 			for(int i = 0; i < 16; i = i+1)
 				mem[index+i] <= {1'b1,wr_ins[i]};
 		end
@@ -71,11 +70,11 @@ module i_cache(
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n)
             i_cache_seg_fault <= 0;
-        else if(seg_f_en)
+        else if((rd_en|wr_en) && seg_f_en)
             i_cache_seg_fault <= 1;
 
     // cache miss
-	assign miss = (rd_en && mem[cur_pc[8:0]][32]);
+	assign miss = (rd_en && mem[index][32]);
 	
 	// atomic ins.
 	assign atomic = ins[0];
