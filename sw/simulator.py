@@ -1,5 +1,6 @@
 import copy
 import re
+import collections
 from assembler import imm_to_bin, bindigits
 
 IDLE = 0
@@ -63,7 +64,7 @@ def full_adder(str1, str2):
 
 
 class Simulator:
-    def _add(thrd, cmd):
+    def _add(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
       
@@ -72,7 +73,7 @@ class Simulator:
       thrd.regs[rd] = int(full_adder(bindigits(thrd.regs[ra],32), bindigits(thrd.regs[rb],32)),2)
       return
 
-    def _not(thrd, cmd):
+    def _not(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra] = [_ for _ in args if len(_) > 0]
       
@@ -83,7 +84,7 @@ class Simulator:
       # print(thrd.regs[rd])
       return
 
-    def _and(thrd, cmd):
+    def _and(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
       
@@ -94,7 +95,7 @@ class Simulator:
       # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _or(thrd, cmd):
+    def _or(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
       
@@ -105,7 +106,7 @@ class Simulator:
       # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _xor(thrd, cmd):
+    def _xor(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
       
@@ -116,7 +117,7 @@ class Simulator:
       # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _addi(thrd, cmd):
+    def _addi(thrd, cmd, mem=None):
 
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
@@ -129,7 +130,7 @@ class Simulator:
       # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _andi(thrd, cmd):
+    def _andi(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -139,7 +140,7 @@ class Simulator:
       thrd.regs[rd] = thrd.regs[ra] & imm
       return
 
-    def _ori(thrd, cmd):
+    def _ori(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -150,7 +151,7 @@ class Simulator:
       # print('ori result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _xori(thrd, cmd):
+    def _xori(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -161,7 +162,7 @@ class Simulator:
       # print('xori result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _shlt(thrd, cmd):
+    def _shlt(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -172,7 +173,7 @@ class Simulator:
       print('shlt result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _shrt(thrd, cmd):
+    def _shrt(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
@@ -184,19 +185,22 @@ class Simulator:
       # print('shrt result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _shra(thrd, cmd):
+    def _shra(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
       
       rd,ra= int(rd[1:]),int(ra[1:])
       imm = str_to_int(imm)
 
-      # print('shrt before: ', bindigits(thrd.regs[rd],32))
-      thrd.regs[rd] = thrd.regs[ra] >> imm
-      # print('shrt result: ', bindigits(thrd.regs[rd],32))
+      # print('shra before: ', bindigits(thrd.regs[rd],32))
+      tmp = bindigits(thrd.regs[rd],32)
+      tmp = tmp[0] * imm + tmp[0:32-imm]
+      # print('tmp:', tmp)
+      thrd.regs[rd] = int(tmp,2)
+      # print('shra result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _lbi(thrd, cmd):
+    def _lbi(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, imm] = [_ for _ in args if len(_) > 0]
       
@@ -209,7 +213,7 @@ class Simulator:
       # print('lbi result: ', bindigits(thrd.regs[rd],32))
       return
 
-    def _slbi(thrd, cmd):
+    def _slbi(thrd, cmd, mem=None):
       args = re.split(',| ', cmd)
       [_, rd, imm] = [_ for _ in args if len(_) > 0]
       
@@ -218,6 +222,32 @@ class Simulator:
       thrd.regs[rd] = (thrd.regs[rd] << 16) + imm
       # print('slbi result: ', bindigits(thrd.regs[rd],32))
       return
+
+    # M[ra + imm] = rb
+    def _st(thrd, cmd, mem=None):
+      args = re.split(',| ', cmd)
+      [_, ra, rb, imm] = [_ for _ in args if len(_) > 0]
+      
+      ra, rb, imm = int(ra[1:]), int(rb[1:]), str_to_int(imm)
+
+      addr = full_adder(bindigits(thrd.regs[ra],32), bindigits(imm,32))
+      mem.update({addr: bindigits(thrd.regs[rb],32)})
+      # print('st result: ', {addr: bindigits(thrd.regs[rb],32)})
+      return
+    
+    
+    # rd = M[ra + imm]
+    def _ld(thrd, cmd, mem=None):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
+      
+      rd, ra, imm = int(rd[1:]), int(ra[1:]), str_to_int(imm)
+
+      addr = full_adder(bindigits(thrd.regs[ra],32), bindigits(imm,32))
+      thrd.regs[rd] = int(mem[addr],2) if mem[addr] != '' else 0
+      # print(f'ld result: addr: {addr}, reg{rd}: {thrd.regs[rd]}', )
+      return 
+    
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
     'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt', 'slp', 'wk', 'kill','nt']
@@ -234,11 +264,11 @@ class Simulator:
       'xori': _xori,
       'shlt': _shlt, 
       'shrt': _shrt, 
-      # 'shra': _shra,
+      'shra': _shra,
       'lbi': _lbi, 
       'slbi': _slbi,
-      # 'st': _st, 
-      # 'ld': _ld, 
+      'st': _st, 
+      'ld': _ld, 
       # 'jal': _jal, 
       # 'jalr': _jalr, 
       # 'beq': _beq, 
@@ -253,7 +283,7 @@ class Simulator:
     def __init__(self):
       print("simulator starts")
       self.counter = 0
-      self.mem = {}
+      self.mem = collections.defaultdict(str)
       self.threads = [0]*8
       self.instr = []
       self.labels = {}
@@ -317,15 +347,15 @@ class Simulator:
       # print('pc %d -> cmd %s' %(cmd[0], opcode))
       if opcode[-1] == 'a' and opcode[:-1] in Simulator.cmd_table:
         if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          retStr = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.labels)
+          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem, self.labels)
         else: 
-          retStr = Simulator.func_map[opcode[:-1]](thrd, cmd.lower())
+          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem)
         atomic = True
       else:
         if opcode in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          retStr = Simulator.func_map[opcode](thrd, cmd.lower(), self.labels)
+          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.mem, self.labels)
         else:
-          retStr = Simulator.func_map[opcode](thrd, cmd.lower())
+          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.mem)
 
 
       thrd.pc += 1
@@ -382,8 +412,9 @@ if __name__ == '__main__':
   s = Simulator()
   s.run('./test_cases/test_input.asm')
 
-  a = '11111111111111111111111111111111'
-  print(len(a))
+  # a = ''
+  print(s.mem)
+  # print(int(a,2))
   # b = 7
   # print(hex(a),hex(b))
   # a = bindigits(a,32)

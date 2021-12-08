@@ -14,12 +14,17 @@ addi r1, r1, 5
 ORI r0, r0, -1
 // xORI r7, r8, 0x26F
 shlt r0,r0, 0xF
-addi r31, r31, -1
-shrt r31,r31, 0x04
+addi r31, r31, 0xFF
+shra r31,r31, 0x04
 lbi r10, -5
 slbi r10, -7
 // sta r1,r31, 0x0FF
-// ld r1,r31, 0x7FF
+
+andi r1, r1, 0
+andi r2, r2, 0
+lbi r2, 0x77
+st r1,r2, 0x7FF
+ld r2,r1, 0x7FF
 // jal r0, 0x1FF
 // jalr r31, r1, 0x234
 // 
