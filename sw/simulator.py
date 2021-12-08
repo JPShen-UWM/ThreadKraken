@@ -1,6 +1,6 @@
 import copy
 import re
-from assembler import imm_to_bin
+from assembler import imm_to_bin, bindigits
 
 IDLE = 0
 RUNNABLE = 1
@@ -35,6 +35,26 @@ def invert(str):
       ret += '0'
   return ret
 
+def full_adder(str1, str2):
+  str1, str2 = str(str1), str(str2)
+  c = 0
+  ret = ''
+  
+  for i in range(31,-1,-1):
+    tmp = ''
+    if str1[i] == str2[i] and str1[i] == '1':
+      tmp = '1' if c != 0 else '0'
+      c = 1
+    elif str1[i] != str2[i]:
+      tmp = '0' if c != 0 else '1'
+      c = 1 if c == 1 else 0
+    else:
+      tmp = str(c)
+      c = 0
+    ret = tmp + ret
+  return ret
+
+
 # def twos_comp(val, bits):
 #     """compute the 2's complement of int value val"""
 #     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
@@ -49,7 +69,7 @@ class Simulator:
       
       rd,ra,rb = int(rd[1:]),int(ra[1:]),int(rb[1:])
 
-      thrd.regs[rd] = thrd.regs[ra] + thrd.regs[rb]
+      thrd.regs[rd] = int(full_adder(bindigits(thrd.regs[ra],32), bindigits(thrd.regs[rb],32)),2)
       return
 
     def _not(thrd, cmd):
@@ -58,9 +78,9 @@ class Simulator:
       
       rd,ra = int(rd[1:]),int(ra[1:])
 
-      print("not: ", ~thrd.regs[ra], thrd.regs[ra])
-      thrd.regs[rd] = int(invert(imm_to_bin(str(thrd.regs[ra]), 32, 1)),2)
-      print(thrd.regs[rd])
+      # print("not: ", ~thrd.regs[ra], thrd.regs[ra])
+      thrd.regs[rd] = int(invert(bindigits(thrd.regs[ra],32)),2)
+      # print(thrd.regs[rd])
       return
 
     def _and(thrd, cmd):
@@ -69,7 +89,9 @@ class Simulator:
       
       rd,ra,rb = int(rd[1:]),int(ra[1:]),int(rb[1:])
 
+      # print("and: ", bindigits(thrd.regs[ra],32), bindigits(thrd.regs[rb],32))
       thrd.regs[rd] = thrd.regs[ra] & thrd.regs[rb]
+      # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _or(thrd, cmd):
@@ -78,7 +100,9 @@ class Simulator:
       
       rd,ra,rb = int(rd[1:]),int(ra[1:]),int(rb[1:])
 
+      # print("or: ", bindigits(thrd.regs[ra],32), bindigits(thrd.regs[rb],32))
       thrd.regs[rd] = thrd.regs[ra] | thrd.regs[rb]
+      # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _xor(thrd, cmd):
@@ -87,7 +111,9 @@ class Simulator:
       
       rd,ra,rb = int(rd[1:]),int(ra[1:]),int(rb[1:])
 
+      # print("xor: ", bindigits(thrd.regs[ra],32), bindigits(thrd.regs[rb],32))
       thrd.regs[rd] = thrd.regs[ra] ^ thrd.regs[rb]
+      # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _addi(thrd, cmd):
@@ -99,7 +125,9 @@ class Simulator:
       rd,ra= int(rd[1:]),int(ra[1:])
       imm = str_to_int(imm)
 
-      thrd.regs[rd] = thrd.regs[ra] + imm
+      # print("addi: ", bindigits(thrd.regs[ra],32), bindigits(imm,32))
+      thrd.regs[rd] = int(full_adder(bindigits(thrd.regs[ra],32), bindigits(imm,32)),2)
+      # print('result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _andi(thrd, cmd):
@@ -120,7 +148,11 @@ class Simulator:
       
       rd,imm = int(rd[1:]), str_to_int(imm)
 
-      thrd.regs[rd] = (thrd.regs[rd]&~0xFFFF) + imm
+      # print('lbi original: ', bindigits(thrd.regs[rd],32))
+      original = bindigits(thrd.regs[rd],32)
+      original = original[:16] + bindigits(imm,16)
+      thrd.regs[rd] = int(original,2)
+      # print('lbi result: ', bindigits(thrd.regs[rd],32))
       return
 
     def _slbi(thrd, cmd):
@@ -130,6 +162,7 @@ class Simulator:
       rd,imm = int(rd[1:]), str_to_int(imm)
 
       thrd.regs[rd] = (thrd.regs[rd] << 16) + imm
+      print('slbi result: ', bindigits(thrd.regs[rd],32))
       return
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
@@ -183,7 +216,7 @@ class Simulator:
         for line in lines:
           self.processLabels(line.strip())
       print('instructions loaded')
-      print(self.instr)
+      # print(self.instr)
       return
     
     def processLabels(self, cmd):
@@ -215,7 +248,8 @@ class Simulator:
         
         
         print(cur_thrd)
-        print(cur_thrd.regs)
+        # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
+        # print(tmp)
       return
 
     def execute_on_thread(self, thrd):
@@ -254,7 +288,7 @@ class Simulator:
 
 
 class Thread:
-    def __init__(self, id = 0, pc=0, stack=[], regs = [0x00000000]*32, parent = None):
+    def __init__(self, id = 0, pc=0, stack=[], regs = [0]*32, parent = None):
       self.id = id
       self.stack = copy.deepcopy(stack)
       self.pc = copy.deepcopy(pc)
@@ -294,10 +328,19 @@ if __name__ == '__main__':
   s = Simulator()
   s.run('./test_cases/test_input.asm')
 
-  a = 255
-  b = -7
-  print(hex(a),hex(b))
-  print(imm_to_bin('-0x1', 32,1))
+  a = '11111111111111111111111111111111'
+  print(len(a))
+  # b = 7
+  # print(hex(a),hex(b))
+  # a = bindigits(a,32)
+  # b = bindigits(b,32)
+  # c = full_adder(a, b)
+  
+  # print('a:', a)
+  # print('b:', b)
+  # print('c:', c)
+  # print(imm_to_bin('248', 32,1))
+  # print( len(c))
   
 
 
