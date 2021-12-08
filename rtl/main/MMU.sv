@@ -18,10 +18,8 @@ module MMU(
     input                   d_miss      ,
     input                   d_segfault  ,
 */
-
-    addr_tr_unit iTR();
-    
-    memory_map();
+    cache_ctrl iCC();
+    memory_map iMAP();
     	
 /*         IDLE = 2'b00,
 		READ = 2'b01,

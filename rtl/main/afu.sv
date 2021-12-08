@@ -150,7 +150,7 @@ module afu
        .corrected_address(final_addr)
    );
 
-   // Memory Controller module -- TODO: replace with wrapper module to arbitrate rd/wr requests from cache
+   // Memory Controller module
    mem_ctrl
    memory(
        .clk(clk),

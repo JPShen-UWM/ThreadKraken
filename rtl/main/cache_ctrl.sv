@@ -1,7 +1,7 @@
 /*
  * Module name: cache_ctrl
  * Engineer: Tommy Yee
- * Description: cache control fsm. arbitrates dma reads/writes.
+ * Description: cache control fsm
  * Dependency:
  * Status: developing
  */
@@ -10,8 +10,8 @@ module cache_ctrl(
     input                   rst_n       ,
     
     input   logic   [31:0]  i_addr      ,
-    input   logic           i_rd        ,
-    input   logic   [2:0]   i_trd       , // 
+    input   logic           i_rd        ,       // read request from core
+//    input   logic   [2:0]   i_trd       ,
     
     output          [31:0]  i_rd_data   ,
     output                  i_miss      ,
@@ -21,13 +21,17 @@ module cache_ctrl(
     input   logic   [31:0]  d_wr_data   ,
     input   logic           d_rd        ,
     input   logic           d_wr        ,
-    input   logic   [2:0]   d_trd       ,
+//    input   logic   [2:0]   d_trd       ,
     
     output          [31:0]  d_rd_data   ,
     output                  d_miss      ,
     output                  d_segfault  ,
 );
     //////////////////////////////////////// internal signals ////////////////////////////////////////
+    
+    
+    /////////////////////////////////////////// sm signals ///////////////////////////////////////////
+    
 
                   
 /*

@@ -25,9 +25,11 @@ module i_cache(
     output logic [31:0] i_addr,
     output logic        i_miss,
     output logic        atomic,
-    output logic        i_cache_seg_fault  // assert when trying to access out of range
+    output logic        i_cache_seg_fault,  // assert when trying to access out of range
+    output logic        vld
 );
     logic [32:0]        mem[0:511];        // {valid,ins[31:0]}
+    logic [32:0]        line;
     logic [8:0]         index;
     logic               seg_f_en;
     
@@ -37,15 +39,15 @@ module i_cache(
     // cache read/write
     always_ff @(posedge clk, negedge rst_n)
 		if(!rst_n) begin
-			ins <= 32'h0;
-			for(index = 0; index < 512; index = index + 1)
-				mem[index] <= 33'h0;
+			line <= 33'h0;
+			for(int i = 0; i < 512; i = i + 1)
+				mem[i] <= 33'h0;
 		end
-		else if(rd_en && i_cache_seg_fault) begin
-			ins <= mem[index][31:0];
+		else if(rd_en && ~i_cache_seg_fault) begin
+			line <= mem[index][32:0];
 		end
-		else if(wr_en && i_cache_seg_fault) begin
-			for(int i = 0; i < 16; i = i+1)
+		else if(wr_en && ~i_cache_seg_fault) begin
+			for(int i = 0; i < 16; i = i + 1)
 				mem[index+i] <= {1'b1,wr_ins[i]};
 		end
     
@@ -74,9 +76,13 @@ module i_cache(
             i_cache_seg_fault <= 1;
 
     // cache miss
-	assign miss = (rd_en && mem[index][32]);
+	assign i_miss = (rd_en && ~mem[index][32]);
 	
 	// atomic ins.
 	assign atomic = ins[0];
+    
+    // data returned is valid
+    assign vld = line[32];
+    assign ins = line[31:0];
 
 endmodule

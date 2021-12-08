@@ -26,10 +26,15 @@ module csr_ctrl(
     input   logic           running     ,
     input   logic           trd_of      ,
     input   logic           trd_full    ,
-    output  logic           
     
 );
-
+    // inst CSRs
+    csr #(child_0) ch0(
+        .clk(clk),
+        .rst_n(rst_n),
+        .clr_ex(0),
+        .i_cache_seg_fault(i_segfault)
+    );
 
 
 endmodule
