@@ -526,13 +526,13 @@ class Assembler:
         return
 
     def processLabels(self, cmd):
-        if not cmd or cmd[0] == '#': return
+        if not cmd or cmd[0] == '#' or cmd[0] == '/': return
         if cmd[0] == ".":
             self.labels[cmd] = self.pc
 
         else:
             if cmd.find('/') != -1:
-              self.programStack.append([self.pc, cmd[:cmd.find('/')]])
+              self.programStack.append([self.pc, cmd[:cmd.find('/')].strip()])
             else:
               self.programStack.append([self.pc, cmd])
             self.pc += 1
