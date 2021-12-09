@@ -2,7 +2,7 @@
  * Module name: cache_ctrl
  * Engineer: Tommy Yee
  * Description: cache control fsm
- * Dependency:
+ * Dependency: MMU
  * Status: developing
  */
 module cache_ctrl(
@@ -11,29 +11,67 @@ module cache_ctrl(
     
     input   logic   [31:0]  i_addr      ,
     input   logic           i_rd        ,       // read request from core
-//    input   logic   [2:0]   i_trd       ,
-    
     output          [31:0]  i_rd_data   ,
     output                  i_miss      ,
-    output                  i_segfault  ,
     
     input   logic   [31:0]  d_addr      ,
     input   logic   [31:0]  d_wr_data   ,
     input   logic           d_rd        ,
     input   logic           d_wr        ,
-//    input   logic   [2:0]   d_trd       ,
     
     output          [31:0]  d_rd_data   ,
-    output                  d_miss      ,
-    output                  d_segfault  ,
+    output                  d_miss      
 );
     /////////////////////////////////////// internal signals ///////////////////////////////////////
-    
-    
+    logic i_rd_req;
+    logic d_rd_req;
+    logic d_wr_req;
+
     ////////////////////////////////////////// sm signals //////////////////////////////////////////
-    typedef enum logic [1:0] {IDLE, READ, WRITE} state_t;
+    logic clr_req;
+
+    typedef enum logic [1:0] {IDLE, COMPARE, ALLOC, WRITEBACK} state_t;
     state_t state, nxt_state;
 
     /////////////////////////////////////////// datapath ///////////////////////////////////////////
+    always_ff @(posedge clk, negedge rst_n)
+        if(!rst_n) begin
+            i_rd_req <= 0;
+            d_rd_req <= 0;
+            d_wr_req <= 0;
+        end
+        else if(clr_req) begin
+            i_rd_req <= 0;
+            d_rd_req <= 0;
+            d_wr_req <= 0;
+        end
+        else if(i_rd)
+            i_rd_req <= 1;
+        else if(d_rd)
+            d_rd_req <= 1;
+        else if(d_wr)
+            d_wr_req <= 1;
 
+    always_ff @(posedge clk, negedge rst_n)
+        if(!rst_n)
+            state <= IDLE;
+        else
+            state <= nxt_state;
+
+    always_comb begin
+        nxt_state = state;
+        clr_req = 0;
+
+        case(state)
+            // wait for processor request
+            IDLE: begin
+                if(i_rd|d_rd|d_wr)
+                    nxt_state = COMPARE;
+            end
+
+            // check cache line (segfault occurs at MMU)
+            COMPARE: begin
+
+            end
+    end
 endmodule

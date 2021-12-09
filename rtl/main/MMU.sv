@@ -30,6 +30,7 @@ module MMU(
     input   logic           tx_done     ,       // host done with read/write
     input   logic           ready       ,       // host ready for read/write
     output  logic   [1:0]   mem_op      ,       // rd/wr op to mem_ctrl
+    output  logic   [63:0]  cpu_addr            // zero ext address
 
 );
     /////////////////////////////////////// internal signals ///////////////////////////////////////
@@ -75,9 +76,6 @@ module MMU(
     end
 
     always_ff @(posedge clk, negedge rst_n)
-        if(!rst_n) begin
-            
-        end
+        if(!rst_n)
 
-    // TODO: CSR interface
 endmodule
