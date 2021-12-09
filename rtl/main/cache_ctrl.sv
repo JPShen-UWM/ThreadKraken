@@ -26,6 +26,7 @@ module cache_ctrl(
     logic i_rd_req;
     logic d_rd_req;
     logic d_wr_req;
+    logic i_vld;
 
     ////////////////////////////////////////// sm signals //////////////////////////////////////////
     logic clr_req;
@@ -34,6 +35,24 @@ module cache_ctrl(
     state_t state, nxt_state;
 
     /////////////////////////////////////////// datapath ///////////////////////////////////////////
+    i_cache iMEMC(
+        .clk        (clk)           ,
+        .rst_n      (rst_n)         ,
+        .cur_pc     (i_addr)        ,
+        .wr_ins     (i_rd_data),      // [31:0] wr_ins[0:15]
+    input  logic        wr_en,
+    input  logic        rd_en,
+
+    output logic [31:0] ins,
+    output logic [31:0] i_addr,
+    output logic        i_miss,
+    output logic        atomic,
+    output logic        i_cache_seg_fault,  // assert when trying to access out of range
+        .vld    (i_vld)
+    );
+    
+    d_cache dMEMC(
+    );
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n) begin
             i_rd_req <= 0;
@@ -71,7 +90,10 @@ module cache_ctrl(
 
             // check cache line (segfault occurs at MMU)
             COMPARE: begin
-
+                if(i_rd_req && i_vld) begin
+                    nxt_state = ALLOC;
+                end
+                
             end
     end
 endmodule
