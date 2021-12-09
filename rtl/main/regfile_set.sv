@@ -32,9 +32,16 @@ module regfile_set
     logic init_reg_exe;
     logic [2:0] init_trd_exe;
     logic final_data;
+    logic [2:0] trd_exe;
 
-    assign rd_data_a = reg_a_out[trd_dec];
-    assign rd_data_b = reg_b_out[trd_dec];
+    
+    always @(posedge clk, negedge rst_n) begin
+        if(!rst_n) trd_exe <= 0;
+        else trd_exe <= trd_dec;
+    end
+
+    assign rd_data_a = reg_a_out[trd_exe];
+    assign rd_data_b = reg_b_out[trd_exe];
 
     logic init_0;
     assign init_0 = 0;

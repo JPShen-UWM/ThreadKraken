@@ -59,7 +59,7 @@ module thread_csr #( parameter TRD_ID = 0 )
         if(!rst_n) begin 
             cur_pc <= START_PC;
         end
-        else if(init) begin
+        else if(init & obj_trd == TRD_ID) begin
             cur_pc <= init_pc;
         end
         else if(pc_wr) begin
