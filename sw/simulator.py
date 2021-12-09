@@ -6,6 +6,10 @@ from assembler import imm_to_bin, bindigits
 IDLE = 0
 RUNNABLE = 1
 SLEEP = 2
+ESP = 2
+
+stack_mapping = { 0: '0x00010FFF', 1: '0x00010DFF', 2: '0x00010CFF', 3: '0x00010BFF', 4: '0x00010AFF',
+    5: '0x000109FF', 6: '0x000108FF', 7: '0x000107FF'}
 
 def findSlot(pool):
   for i,slot in enumerate(pool):
@@ -245,7 +249,10 @@ class Simulator:
       ra, rb, imm = int(ra[1:]), int(rb[1:]), str_to_int(imm)
 
       addr = full_adder(bindigits(thrd.regs[ra],32), bindigits(imm,32))
-      mem.update({addr: bindigits(thrd.regs[rb],32)})
+      if addr<= stack_mapping[thrd.id] and addr >= bindigits(thrd.stack_bot,32):
+        thrd.stack.update({addr: bindigits(thrd.regs[rb],32)})
+      else:
+        mem.update({addr: bindigits(thrd.regs[rb],32)})
       # print('st result: ', {addr: bindigits(thrd.regs[rb],32)})
       return
     
@@ -258,7 +265,10 @@ class Simulator:
       rd, ra, imm = int(rd[1:]), int(ra[1:]), str_to_int(imm)
 
       addr = full_adder(bindigits(thrd.regs[ra],32), bindigits(imm,32))
-      thrd.regs[rd] = int(mem[addr],2) if mem[addr] != '' else 0
+      if addr<= stack_mapping[thrd.id] and addr >= bindigits(thrd.stack_bot,32):
+        thrd.regs[rd] = int(thrd.stack[addr],2) if mem[addr] != '' else 0
+      else:
+        thrd.regs[rd] = int(mem[addr],2) if mem[addr] != '' else 0
       # print(f'ld result: addr: {addr}, reg{rd}: {thrd.regs[rd]}', )
       return 
 
@@ -292,10 +302,10 @@ class Simulator:
       rd, ra  = int(rd[1:]), int(ra[1:])
       imm = str_to_int(imm) # can be neg
 
-      print(f'jalr before: imm in int: {imm}, ra: {thrd.regs[ra]}, curPC: {thrd.pc}')
+      # print(f'jalr before: imm in int: {imm}, ra: {thrd.regs[ra]}, curPC: {thrd.pc}')
       thrd.regs[rd] = thrd.pc + 1
       thrd.pc = imm + thrd.regs[ra] - 1 # add 1 is handled by execute_thread
-      print(f'jalr result: rd: {thrd.regs[rd]}, newPC: {thrd.pc + 1}')
+      # print(f'jalr result: rd: {thrd.regs[rd]}, newPC: {thrd.pc + 1}')
       return 
       
     # beq 
@@ -379,6 +389,30 @@ class Simulator:
       self.threads[newID].regs[8] = parent.regs[rb]
       return
 
+    def _slp(self, thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd] = [_ for _ in args if len(_) > 0]
+
+      rd = int(rd[1:])
+      self.threads[thrd.regs[rd]].state = SLEEP
+      return
+
+    def _wk(self, thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd] = [_ for _ in args if len(_) > 0]
+
+      rd = int(rd[1:])
+      self.threads[thrd.regs[rd]].state = RUNNABLE
+      return
+
+    def _kill(self, thrd, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd] = [_ for _ in args if len(_) > 0]
+
+      rd = int(rd[1:])
+      self.threads[thrd.regs[rd]].state = IDLE
+      return
+
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
     'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt', 'slp', 'wk', 'kill','nt']
 
@@ -403,11 +437,7 @@ class Simulator:
       'jalr': _jalr, 
       'beq': _beq, 
       'bneq': _bneq, 
-      'blt': _blt,
-      # 'slp': _slp,
-      # 'wk': _wk,
-      # 'kill': _kill,
-      # 'nt': _nt
+      'blt': _blt
     }
 
     def __init__(self):
@@ -504,7 +534,6 @@ class Simulator:
 
 
 
-
 class Thread:
     def __init__(self, id = 0, pc=0, stack={}, regs = [0]*32, parent = None):
       self.id = id
@@ -514,6 +543,8 @@ class Thread:
       self.parent = parent
       self.children = []
       self.state = RUNNABLE
+      self.regs[ESP] = int(stack_mapping[id],16)
+      self.stack_bot = int(stack_mapping[id],16) - int('0xFF',16) if self.id != 0 else int(stack_mapping[id],16) - int('0x1FF',16)
 
     def create(self, id):
       self.children.append(Thread(id=id, pc=self.pc+1, stack=self.stack, regs=self.regs,
@@ -536,6 +567,7 @@ class Thread:
       str += f'Current PC :   {self.pc}\n'
       str += f'parent thrd:   {self.parent}\n'
       str += f'child thrd :   {self.children}\n'
+      str += f'stack: {self.stack}'
       str += f'*'*40
       return str
 
