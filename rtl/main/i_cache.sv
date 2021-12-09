@@ -16,7 +16,7 @@ module i_cache(
     input  logic        clk,
     input  logic        rst_n,
     input  logic [31:0] cur_pc,
-    input  logic [31:0] wr_ins[0:15],            // 32-bit cache line to read from memory
+    input  logic [31:0] wr_ins[0:15],      // 32-bit cache line to read from memory
     input  logic        wr_en,
     input  logic        rd_en,
     // input  logic       INT,             // from interrupt handler, int enable
@@ -81,7 +81,7 @@ module i_cache(
 	// atomic ins.
 	assign atomic = ins[0];
     
-    // data returned is valid
+    // return line of data
     assign vld = line[32];
     assign ins = line[31:0];
 
