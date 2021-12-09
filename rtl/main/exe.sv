@@ -122,7 +122,7 @@ module exe(
     );
 
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n | flushEX) begin
+        if(!rst_n | flushEX | stall) begin
             addr_mem    <= 0;
             ins_mem     <= 0;
             pc_mem      <= 0;
@@ -135,7 +135,7 @@ module exe(
             trd_ctrl_mem<= 0;
             obj_trd_mem <= 0;
         end
-        else if(!stall) begin
+        else begin
             addr_mem    <= alu_out_exe;
             ins_mem     <= ins_exe;
             pc_mem      <= pc_exe;
