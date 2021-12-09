@@ -19,7 +19,6 @@ module i_cache(
     input  logic [31:0] wr_ins[0:15],      // 32-bit cache line to read from memory
     input  logic        wr_en,
     input  logic        rd_en,
-    // input  logic       INT,             // from interrupt handler, int enable
 
     output logic [31:0] ins,
     output logic [31:0] i_addr,
@@ -33,25 +32,25 @@ module i_cache(
     logic [8:0]         index;
     logic               seg_f_en;
     
-	// cache is large enough for everything in memory so only index bits
+    // cache is large enough for everything in memory so only index bits
     assign index = cur_pc[8:0];
 
     // cache read/write
     always_ff @(posedge clk, negedge rst_n)
-		if(!rst_n) begin
-			line <= 33'h0;
-			for(int i = 0; i < 512; i = i + 1)
-				mem[i] <= 33'h0;
-		end
-		else if(rd_en && ~i_cache_seg_fault) begin
-			line <= mem[index][32:0];
-		end
-		else if(wr_en && ~i_cache_seg_fault) begin
-			for(int i = 0; i < 16; i = i + 1)
-				mem[index+i] <= {1'b1,wr_ins[i]};
-		end
+        if(!rst_n) begin
+            line <= 33'h0;
+            for(int i = 0; i < 512; i = i + 1)
+                mem[i] <= 33'h0;
+        end
+        else if(rd_en && ~i_cache_seg_fault) begin
+            line <= mem[index][32:0];
+        end
+        else if(wr_en && ~i_cache_seg_fault) begin
+            for(int i = 0; i < 16; i = i + 1)
+                mem[index+i] <= {1'b1,wr_ins[i]};
+        end
     
-	// read/write must be in range of valid addresses
+    // read/write must be in range of valid addresses
     always_comb begin
         // default outputs
         seg_f_en = 0;
@@ -76,10 +75,10 @@ module i_cache(
             i_cache_seg_fault <= 1;
 
     // cache miss
-	assign i_miss = (rd_en && ~mem[index][32]);
-	
-	// atomic ins.
-	assign atomic = ins[0];
+    assign i_miss = (rd_en && ~mem[index][32]);
+
+    // atomic ins.
+    assign atomic = ins[0];
     
     // return line of data
     assign vld = line[32];

@@ -29,21 +29,24 @@ module MMU(
     // memory controller interface
     input   logic           tx_done     ,       // host done with read/write
     input   logic           ready       ,       // host ready for read/write
-    output  logic   [1:0]   mem_op      ,
+    output  logic   [1:0]   mem_op      ,       // rd/wr op to mem_ctrl
 
 );
     /////////////////////////////////////// internal signals ///////////////////////////////////////
     logic [7:0] csr_d_segfault, csr_i_segfault;
 
-    
+    UART iTCV(
+        .clk(clk),
+        .rst_n(rst_n),
+
+    );
     cache_ctrl iCC();
-    memory_map iMAP();
     	
 /*         IDLE = 2'b00,
 		READ = 2'b01,
 		WRITE = 2'b11  */
 
-    // TODO: check read/write in accessible memory range
+    // check read/write in accessible memory range
     always_comb begin
         i_segfault = 0;
         d_segfault = 0;
