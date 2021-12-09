@@ -67,7 +67,7 @@ module top_level_tb();
     assign sleep = DUT.sleep;
     assign wake = DUT.wake;
     assign init = DUT.INSFETCH.THREAD_CTRL.init;
-    assign new_trd = DUT.new_trd_id;
+    assign new_trd = DUT.new_trd;
     assign obj_trd = DUT.obj_trd_wb;
     assign act_trd = DUT.trd_wb;
     assign par_trd = DUT.trd_dec;

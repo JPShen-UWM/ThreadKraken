@@ -18,8 +18,9 @@ module regfile_set
     input           [4:0]   reg_wr      ,
     input                   wr_en       ,
     input           [31:0]  wr_data     ,
-    input                   init        ,
-    input           [2:0]   init_trd    ,
+    input           [2:0]   new_trd_wb  ,
+    input                   init_wb     ,
+    input           [31:0]  init_data_wb,
     
     output          [31:0]  rd_data_a   ,
     output          [31:0]  rd_data_b    
@@ -28,19 +29,16 @@ module regfile_set
     logic [31:0] reg_a_out [7:0];
     logic [31:0] reg_b_out [7:0];
 
-    logic [31:0] init_data;
     logic init_reg_exe;
     logic [2:0] init_trd_exe;
+    logic final_data;
 
     assign rd_data_a = reg_a_out[trd_dec];
     assign rd_data_b = reg_b_out[trd_dec];
 
-    assign init_data = rd_data_b;
+    logic init_0;
+    assign init_0 = 0;
 
-    always_ff @(posedge clk) begin
-        init_trd_exe <= init_trd;
-        init_reg_exe <= init;
-    end
 
     regfile #(0)
     REGFILE_0
@@ -54,9 +52,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_0      ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (0           ),
 
         .data_a      (reg_a_out[0]),
         .data_b      (reg_b_out[0])
@@ -74,9 +72,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[1]),
         .data_b      (reg_b_out[1])
@@ -94,9 +92,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[2]),
         .data_b      (reg_b_out[2])
@@ -114,9 +112,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[3]),
         .data_b      (reg_b_out[3])
@@ -134,9 +132,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[4]),
         .data_b      (reg_b_out[4])
@@ -154,9 +152,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[5]),
         .data_b      (reg_b_out[5])
@@ -174,9 +172,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[6]),
         .data_b      (reg_b_out[6])
@@ -194,9 +192,9 @@ module regfile_set
         .wr_en       (wr_en       ),
         .wr_trd      (wr_trd      ),
         .wr_data     (wr_data     ),
-        .init        (init_reg_exe),
-        .init_trd    (init_trd_exe),
-        .init_data   (init_data   ),
+        .init        (init_wb     ),
+        .new_trd     (new_trd_wb  ),
+        .init_data   (init_data_wb),
 
         .data_a      (reg_a_out[7]),
         .data_b      (reg_b_out[7])
