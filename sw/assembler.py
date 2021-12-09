@@ -575,7 +575,7 @@ class Assembler:
           print(e.__traceback__.tb_frame)
           print(e.__traceback__.tb_lineno)
           print("****************************")
-          exit()
+          # exit()
           
         retStr = retStr[:-1] + atomic
         dec = int(retStr,2)
