@@ -7,7 +7,7 @@
 **/
 `include "../main/header.svh"
 module top_level_tb();
-    parameter mem_miss = 0; // 1 to simulate cache miss
+    parameter mem_miss = 1; // 1 to simulate cache miss
     //parameter test_path = "../sw/test_cases/add1.o";
     parameter MAX_CYCLE = 200;
 
