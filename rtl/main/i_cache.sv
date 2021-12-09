@@ -21,16 +21,13 @@ module i_cache(
     input  logic        rd_en,
 
     output logic [31:0] ins,
-    output logic [31:0] i_addr,
     output logic        i_miss,
     output logic        atomic,
-    // output logic        i_cache_seg_fault,  // assert when trying to access out of range
-    output logic        vld
-    output logic [8:0]  index;
+    output logic        vld,
+    output logic [8:0]  index
 );
     logic [32:0]        mem[0:511];        // {valid,ins[31:0]}
     logic [32:0]        line;
-
     logic               seg_f_en;
     
     // cache is large enough for everything in memory so only index bits
@@ -42,7 +39,7 @@ module i_cache(
             for(int i = 0; i < 512; i = i + 1)
                 mem[i] <= 33'h0;
         end
-        else if(wr_en && ~i_cache_seg_fault) begin
+        else if(wr_en) begin
             for(int i = 0; i < 16; i = i + 1)
                 mem[index+i] <= {1'b1,wr_ins[i]};
         end

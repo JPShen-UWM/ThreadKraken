@@ -10,6 +10,7 @@ module cache_ctrl(
     input                   rst_n       ,
     
     input   logic   [31:0]  i_addr      ,
+    input   logic           i_wr        ,
     input   logic           i_rd        ,       // read request from core
     output          [31:0]  i_rd_data   ,
     output                  i_miss      ,
@@ -51,8 +52,8 @@ module cache_ctrl(
         .rst_n      (rst_n)         ,
         .cur_pc     (i_addr)        ,
         .wr_ins     (i_rd_data),      // [31:0] wr_ins[0:15]
-        .wr_en      (),
-        .rd_en      (),
+        .wr_en      (i_wr),
+        .rd_en      (i_rd),
 
         .ins        (i_rd_data)     ,
         .atomic     ()              ,
@@ -89,11 +90,12 @@ module cache_ctrl(
 
             // check cache line (segfault occurs at MMU)
             I_COMPARE: begin
-                // check tag if match and valid
+                // check tag if match and valid (cache hit)
                 if(i_addr[8:0] == i_idx && i_vld) begin
                     nxt_state = I_ALLOC;
                 end
-                else 
+                else
+                    
             end
             
             I_ALLOC: begin
