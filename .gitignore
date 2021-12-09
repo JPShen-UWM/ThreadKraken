@@ -8,3 +8,7 @@ rtl/work
 sw/__pycache__
 *.o
 *.ref
+/synth
+/work
+work
+synth
