@@ -284,7 +284,7 @@ class Assembler:
         raise Exception('Unrecognized arguments...')
 
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
-      imm = imm_to_bin(imm, IMM_LEN) # no negative
+      imm = imm_to_bin(imm, IMM_LEN, 1) # no negative
       
       return l_ext(rb,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
     
@@ -300,7 +300,7 @@ class Assembler:
         raise Exception('Unrecognized arguments...')
 
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
-      imm = imm_to_bin(imm, IMM_LEN) # no negative
+      imm = imm_to_bin(imm, IMM_LEN, 1) # no negative
       
       return l_ext(rd,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
 
@@ -526,13 +526,13 @@ class Assembler:
         return
 
     def processLabels(self, cmd):
-        if not cmd or cmd[0] == '#': return
+        if not cmd or cmd[0] == '#' or cmd[0] == '/': return
         if cmd[0] == ".":
             self.labels[cmd] = self.pc
 
         else:
             if cmd.find('/') != -1:
-              self.programStack.append([self.pc, cmd[:cmd.find('/')]])
+              self.programStack.append([self.pc, cmd[:cmd.find('/')].strip()])
             else:
               self.programStack.append([self.pc, cmd])
             self.pc += 1
@@ -575,7 +575,7 @@ class Assembler:
           print(e.__traceback__.tb_frame)
           print(e.__traceback__.tb_lineno)
           print("****************************")
-          exit()
+          # exit()
           
         retStr = retStr[:-1] + atomic
         dec = int(retStr,2)

@@ -158,7 +158,7 @@ module thread_ctrl(
     logic [5:0] delay_count;
     logic [7:0] wait_trd;
     logic [7:0] on_trd;
-    assign run_trd = on_trd & ~(wait_trd) & !trd_miss;
+    assign run_trd = on_trd & ~wait_trd & ~trd_miss;
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
             delay_count <= 0;
@@ -282,14 +282,12 @@ module thread_ctrl(
 
 
     // New Thread pointer
-    always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n) new_trd <= 0;
-        else if(init) new_trd <= nxt_new_trd;
-    end
+    assign new_trd = nxt_new_trd;
 
     always_comb begin
         nxt_new_trd = 0;
-        if(!valid_trd[1]) nxt_new_trd = 1;
+        if(!valid_trd[0]) nxt_new_trd = 0;
+        else if(!valid_trd[1]) nxt_new_trd = 1;
         else if(!valid_trd[2]) nxt_new_trd = 2;
         else if(!valid_trd[3]) nxt_new_trd = 3;
         else if(!valid_trd[4]) nxt_new_trd = 4;
@@ -299,8 +297,14 @@ module thread_ctrl(
     end
 
     assign init = init_trd | rst_init;
-    assign obj_trd = init? new_trd: obj_trd_in;
+    assign obj_trd = init? nxt_new_trd: obj_trd_in;
     
+    logic [31:0] last_pc;
+
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) last_pc <= 0;
+        else last_pc <= cur_pc;
+    end
     // Current pc
     always_comb begin
         cur_pc = HANDLER;
@@ -314,6 +318,7 @@ module thread_ctrl(
             3'b110: cur_pc = cur_pc_6;
             3'b111: cur_pc = cur_pc_7;
         endcase
+        if(stall) cur_pc = last_pc;
     end
     // 8 thread csr
     thread_csr #(0)

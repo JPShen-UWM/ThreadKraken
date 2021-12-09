@@ -28,10 +28,8 @@ module exe(
     input           [4:0]   reg_wr_wb   ,
     input           [31:0]  wb_data_wb  ,
     input                   wr_en_wb    ,
-    input           [2:0]   new_trd_exe ,
-    input                   init_trd_exe,
     input           [1:0]   mem_ctrl_exe,
-    input           [1:0]   trd_ctrl_exe,
+    input           [2:0]   trd_ctrl_exe,
     input                   wr_en_exe   ,
     input           [4:0]   reg_wr_exe  ,
 
@@ -44,8 +42,10 @@ module exe(
     output  logic           wr_en_mem   ,
     output  logic           wb_sel_mem  ,
     output  logic   [1:0]   mem_ctrl_mem,
-    output  logic   [1:0]   trd_ctrl_mem,
+    output  logic   [2:0]   trd_ctrl_mem,
     output  logic   [2:0]   obj_trd_mem ,
+    output  logic   [31:0]  new_pc_mem  ,
+    output  logic   [31:0]  new_data_mem,
 
     output  logic   [31:0]  jmp_pc_exe  ,
     output  logic           jmp_en_exe  ,
@@ -58,10 +58,9 @@ module exe(
     logic [31:0] data_a_for, data_b_for;
     logic [31:0] alu_out_exe;
 
-    assign exe_data_exe = init_trd_exe? {29'b0, new_trd_exe}:
-                         &jmp_con_exe[2:0]? pc_exe:
-                         mem_ctrl_exe[1]? data_b_for:
-                         alu_out_exe;
+    assign exe_data_exe = &jmp_con_exe[2:0]? pc_exe:
+                          mem_ctrl_exe[1]? data_b_for:
+                          alu_out_exe;
 
 
     // Forward control
@@ -122,7 +121,7 @@ module exe(
     );
 
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n | flushEX) begin
+        if(!rst_n | flushEX | stall) begin
             addr_mem    <= 0;
             ins_mem     <= 0;
             pc_mem      <= 0;
@@ -134,8 +133,10 @@ module exe(
             mem_ctrl_mem<= 0;
             trd_ctrl_mem<= 0;
             obj_trd_mem <= 0;
+            new_pc_mem  <= 0;
+            new_data_mem<= 0;
         end
-        else if(!stall) begin
+        else begin
             addr_mem    <= alu_out_exe;
             ins_mem     <= ins_exe;
             pc_mem      <= pc_exe;
@@ -147,6 +148,8 @@ module exe(
             mem_ctrl_mem<= mem_ctrl_exe;
             trd_ctrl_mem<= trd_ctrl_exe;
             obj_trd_mem <= data_a_for[2:0];
+            new_pc_mem  <= data_a_for;
+            new_data_mem<= data_b_for;
         end
     end
 endmodule

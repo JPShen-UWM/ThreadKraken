@@ -12,7 +12,6 @@ module insdec
     input                   rst_n           ,
 
     input           [31:0]  ins_dec         ,
-    input           [2:0]   new_trd_id      ,
     input           [2:0]   trd_dec         ,
     input           [31:0]  pc_dec          ,
     input                   flushID         ,
@@ -22,6 +21,9 @@ module insdec
     input           [31:0]  data_wb         ,
     input           [4:0]   wr_reg_wb       ,
     input                   wr_en_final     ,
+    input           [2:0]   new_trd_wb      ,
+    input                   init_wb         ,
+    input           [31:0]  init_data_wb    ,
 
     // Register 
     output  logic   [31:0]  data_a_exe      ,
@@ -40,14 +42,12 @@ module insdec
     output  logic           wb_sel_exe      ,
     output  logic   [2:0]   alu_op_exe      ,
     output  logic   [1:0]   mem_ctrl_exe    ,
-    output  logic   [1:0]   trd_ctrl_exe    ,
+    output  logic   [2:0]   trd_ctrl_exe    ,
     output  logic           exp_jmp_dec     ,
     output  logic           exp_return_dec  ,
     output  logic   [3:0]   jmp_con_exe     ,
     output  logic           invalid_op      ,
-    output  logic           i_type_exe      ,
-    output  logic           init_trd_exe    ,
-    output  logic   [2:0]   new_trd_exe  
+    output  logic           i_type_exe      
 );
 
     logic   [4:0]   reg_rd_a    ;
@@ -57,7 +57,7 @@ module insdec
     logic           wr_en       ;
     logic   [2:0]   alu_op      ;
     logic   [1:0]   mem_ctrl    ;
-    logic   [1:0]   trd_ctrl    ;
+    logic   [2:0]   trd_ctrl    ;
     logic   [3:0]   jmp_con     ;
     logic           i_type      ;
     logic           wb_sel      ;
@@ -85,19 +85,21 @@ module insdec
 
     regfile_set REGFILE_SET
     (
-        .clk         (clk         ),
-        .rst_n       (rst_n       ),
-        .trd_dec     (trd_dec     ),
-        .reg_rd_a    (reg_rd_a    ),
-        .reg_rd_b    (reg_rd_b    ),
-        .wr_trd      (wr_trd_wb   ),
-        .reg_wr      (wr_reg_wb   ),
-        .wr_en       (wr_en_final ),
-        .wr_data     (data_wb     ),
-        .init        (init_trd_dec),
-        .init_trd    (new_trd_id  ),
-        .rd_data_a   (data_a_exe  ),
-        .rd_data_b   (data_b_exe  ) 
+        .clk            (clk         ),
+        .rst_n          (rst_n       ),
+        .trd_dec        (trd_dec     ),
+        .reg_rd_a       (reg_rd_a    ),
+        .reg_rd_b       (reg_rd_b    ),
+        .wr_trd         (wr_trd_wb   ),
+        .reg_wr         (wr_reg_wb   ),
+        .wr_en          (wr_en_final ),
+        .wr_data        (data_wb     ),
+        .new_trd_wb     (new_trd_wb  ),
+        .init_wb        (init_wb     ),
+        .init_data_wb   (init_data_wb),
+
+        .rd_data_a      (data_a_exe  ),
+        .rd_data_b      (data_b_exe  )
     );
 
     // dec/exe pipeline
@@ -116,8 +118,6 @@ module insdec
             jmp_con_exe     <= 0;
             wb_sel_exe      <= 0;
             i_type_exe      <= 0;
-            init_trd_exe    <= 0;
-            new_trd_exe     <= 0;
             trd_exe         <= 0;
         end
         else if(!stall) begin
@@ -135,8 +135,6 @@ module insdec
             jmp_con_exe     <= jmp_con;
             i_type_exe      <= i_type;
             wb_sel_exe      <= wb_sel;
-            init_trd_exe    <= init_trd_dec;
-            new_trd_exe     <= new_trd_id;
         end
     end
 endmodule
