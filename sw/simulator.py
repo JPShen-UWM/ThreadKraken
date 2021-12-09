@@ -304,7 +304,7 @@ class Simulator:
       args = re.split(',| ', cmd)
       [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
 
-      ra, rd = int(rd[1:]), int(ra[1:])
+      ra, rd = int(ra[1:]), int(rd[1:])
       if imm in labels:
         # print(f'jal label: {imm}: {labels[imm]}')
         diff = labels[imm] - thrd.pc - 1
@@ -325,7 +325,7 @@ class Simulator:
       args = re.split(',| ', cmd)
       [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
 
-      ra, rd = int(rd[1:]), int(ra[1:])
+      ra, rd = int(ra[1:]), int(rd[1:])
       if imm in labels:
         # print(f'jal label: {imm}: {labels[imm]}')
         diff = labels[imm] - thrd.pc - 1
@@ -346,7 +346,7 @@ class Simulator:
       args = re.split(',| ', cmd)
       [_, ra, rd, imm] = [_ for _ in args if len(_) > 0]
 
-      ra, rd = int(rd[1:]), int(ra[1:])
+      ra, rd = int(ra[1:]), int(rd[1:])
       if imm in labels:
         # print(f'jal label: {imm}: {labels[imm]}')
         diff = labels[imm] - thrd.pc - 1
@@ -360,6 +360,24 @@ class Simulator:
         thrd.pc += imm # add 1 is handled by execute_thread
       # print(f'beq result:, newPC: {thrd.pc + 1}')
       return 
+
+    def _nt(self, parent, cmd):
+      args = re.split(',| ', cmd)
+      [_, rd, ra, rb] = [_ for _ in args if len(_) > 0]
+
+      rd, ra, rb = int(rd[1:]), int(ra[1:]), int(rb[1:])
+      newID = findSlot(self.threads)
+      if newID == -1: raise Exception('Number of Threads is 8, can not add more!')
+
+      self.threads[newID] = Thread(newID, parent.regs[ra], parent.stack, parent.regs, parent.id)
+      parent.children.append(newID)
+
+      # rd = new Thread's ID
+      parent.regs[rd] = newID
+
+      # new Thread's r8 = rb
+      self.threads[newID].regs[8] = parent.regs[rb]
+      return
 
     cmd_table = ['add', 'not', 'and', 'or', 'xor', 'addi', 'andi', 'ori', 'xori',
     'shlt', 'shrt', 'lbi', 'slbi','st', 'ld', 'jal', 'jalr', 'beq', 'bneq', 'blt', 'slp', 'wk', 'kill','nt']
@@ -456,17 +474,21 @@ class Simulator:
       
       
       # print('pc %d -> cmd %s' %(cmd[0], opcode))
-      if opcode[-1] == 'a' and opcode[:-1] in Simulator.cmd_table:
-        if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(),  self.labels)
-        else: 
-          ret = Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem)
-        atomic = True
+      if opcode in ['nt', ' slp', 'wl', 'kill']:
+        if opcode == 'nt':
+          self._nt(thrd, cmd.lower())
       else:
-        if opcode in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
-          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.labels)
+        if opcode[-1] == 'a' and opcode[:-1] in Simulator.cmd_table:
+          if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
+            Simulator.func_map[opcode[:-1]](thrd, cmd.lower(),  self.labels)
+          else: 
+            Simulator.func_map[opcode[:-1]](thrd, cmd.lower(), self.mem)
+          atomic = True
         else:
-          ret = Simulator.func_map[opcode](thrd, cmd.lower(), self.mem)
+          if opcode in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
+            Simulator.func_map[opcode](thrd, cmd.lower(), self.labels)
+          else:
+            Simulator.func_map[opcode](thrd, cmd.lower(), self.mem)
       
       print(cmd.lower())
 
@@ -484,7 +506,7 @@ class Simulator:
 
 
 class Thread:
-    def __init__(self, id = 0, pc=0, stack=[], regs = [0]*32, parent = None):
+    def __init__(self, id = 0, pc=0, stack={}, regs = [0]*32, parent = None):
       self.id = id
       self.stack = copy.deepcopy(stack)
       self.pc = copy.deepcopy(pc)

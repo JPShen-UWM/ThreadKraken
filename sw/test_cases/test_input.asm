@@ -41,6 +41,11 @@ addi r31, r31, 0xFF
 // beq r0,r1, .gg
 addi r31, r31, 0xFF
 // slp r3
-// nt r0 r1 r2
+andi r1, r1, 0
+lbi r1, 29
+nt r0 r1 r2
+andi r1, r1, 0
+andi r1, r1, 0
+andi r1, r1, 0
 
 
