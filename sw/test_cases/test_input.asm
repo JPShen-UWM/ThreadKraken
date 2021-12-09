@@ -28,8 +28,8 @@ beq r1, r2 1
 andi r1, r1, 0
 andi r2, r2, 0
 lbi r2, 0x77
-st r1,r2, 0x10E00
-ld r2,r1, 0x10E00
+st r1,r2, -1
+ld r2,r1, -1
 .why
 addi r31, r31, 0xFF
 // jalr r31, r1, 0x234
