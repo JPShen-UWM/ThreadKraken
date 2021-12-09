@@ -35,16 +35,15 @@ module i_cache(
     // cache is large enough for everything in memory so only index bits
     assign index = cur_pc[8:0];
 
-    // cache read/write
+    // cache write
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n) begin
-            line <= 33'h0;
             for(int i = 0; i < 512; i = i + 1)
                 mem[i] <= 33'h0;
         end
-        else if(rd_en && ~i_cache_seg_fault) begin
-            line <= mem[index][32:0];
-        end
+        // else if(rd_en && ~i_cache_seg_fault) begin
+        //     line <= mem[index][32:0];
+        // end // this is one cycle delay
         else if(wr_en && ~i_cache_seg_fault) begin
             for(int i = 0; i < 16; i = i + 1)
                 mem[index+i] <= {1'b1,wr_ins[i]};
@@ -81,6 +80,7 @@ module i_cache(
     assign atomic = ins[0];
     
     // return line of data
+    assign line = mem[index];
     assign vld = line[32];
     assign ins = line[31:0];
 

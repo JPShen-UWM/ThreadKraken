@@ -26,10 +26,13 @@ module cache_ctrl(
     logic i_rd_req;
     logic d_rd_req;
     logic d_wr_req;
-    logic i_vld;
+
 
     ////////////////////////////////////////// sm signals //////////////////////////////////////////
     logic clr_req;
+    logic i_vld;
+    logic d_vld;
+    logic rdy;
 
     typedef enum logic [1:0] {IDLE, COMPARE, ALLOC, WRITEBACK} state_t;
     state_t state, nxt_state;
