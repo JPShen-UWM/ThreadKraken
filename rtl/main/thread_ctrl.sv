@@ -438,7 +438,7 @@ module thread_ctrl(
         .wake       (wake),   
         .obj_trd    (obj_trd),
         .act_trd    (act_trd),
-        .nxt_pc     (nxt_pc_0), 
+        .nxt_pc     (nxt_pc_5), 
         .pc_wr      (pc_wr[5]),  
         .cur_pc     (cur_pc_5), 
         .par_trd    (par_trd_5),

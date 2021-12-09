@@ -9,7 +9,7 @@
 module top_level_tb();
     parameter mem_miss = 1; // 1 to simulate cache miss
     //parameter test_path = "../sw/test_cases/add1.o";
-    parameter MAX_CYCLE = 200;
+    parameter MAX_CYCLE = 500;
 
 
     logic           clk         ;
@@ -70,7 +70,7 @@ module top_level_tb();
     assign new_trd = DUT.new_trd;
     assign obj_trd = DUT.obj_trd_wb;
     assign act_trd = DUT.trd_wb;
-    assign par_trd = DUT.trd_dec;
+    assign par_trd = DUT.trd_wb;
 
     initial begin
         cycle_count = 0;
@@ -115,7 +115,7 @@ module top_level_tb();
 
     generate
         if(!mem_miss) begin
-            no_miss_mem #("../sw/thread_test_cases/thread_test1.o") NO_MISS_MEM 
+            no_miss_mem #("../sw/thread_test_cases/thread_test2.o") NO_MISS_MEM 
             (
                 .clk            (clk         ),
                 .rst_n          (rst_n       ),
@@ -156,7 +156,7 @@ module top_level_tb();
             );
         end
         else begin
-            miss_mem #("../sw/thread_test_cases/thread_test1.o") MISS_MEM 
+            miss_mem #("../sw/thread_test_cases/thread_test2.o") MISS_MEM 
             (
                 .clk            (clk         ),
                 .rst_n          (rst_n       ),
