@@ -284,7 +284,7 @@ class Assembler:
         raise Exception('Unrecognized arguments...')
 
       rb,ra = bin(int(rb[1:])),bin(int(ra[1:]))
-      imm = imm_to_bin(imm, IMM_LEN) # no negative
+      imm = imm_to_bin(imm, IMM_LEN, 1) # no negative
       
       return l_ext(rb,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
     
@@ -300,7 +300,7 @@ class Assembler:
         raise Exception('Unrecognized arguments...')
 
       rd,ra = bin(int(rd[1:])),bin(int(ra[1:]))
-      imm = imm_to_bin(imm, IMM_LEN) # no negative
+      imm = imm_to_bin(imm, IMM_LEN, 1) # no negative
       
       return l_ext(rd,5) + l_ext(ra,5) + imm + '0' + OPCODE + '0'   
 
