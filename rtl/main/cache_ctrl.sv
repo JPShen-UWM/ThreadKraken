@@ -22,6 +22,8 @@ module cache_ctrl(
     output          [31:0]  d_rd_data   ,
     output                  d_miss      ,
     
+    
+    
     // mem_ctrl status
     input   logic           tx_done     ,       // host done with read/write
     input   logic           ready               // host ready for read/write
@@ -40,7 +42,7 @@ module cache_ctrl(
     logic d_vld;
     logic cache_rdy;
 
-    typedef enum logic [1:0] {IDLE, COMPARE, ALLOC, WRITEBACK} state_t;
+    typedef enum logic [2:0] {IDLE, D_COMPARE, D_ALLOC, D_WRITEBACK, I_COMPARE, I_ALLOC, I_WRITEBACK} state_t;
     state_t state, nxt_state;
 
     /////////////////////////////////////////// datapath ///////////////////////////////////////////
@@ -53,10 +55,8 @@ module cache_ctrl(
         .rd_en      (),
 
         .ins        (i_rd_data)     ,
-        //.i_addr    (),
-        //.i_miss     ()              ,
         .atomic     ()              ,
-        .i_cache_seg_fault()      ,  // assert when trying to access out of range
+        //.i_cache_seg_fault()      ,  // assert when trying to access out of range
         .vld        (i_vld)         ,
         .index      (i_idx)
     );
@@ -65,26 +65,8 @@ module cache_ctrl(
         
     );
     
-    assign i_miss = (i_rd && ~i_vld) | (d_rd|d_wr);
+    assign i_miss = (i_rd && ~i_vld) | (i_rd && (d_rd|d_wr));
     assign d_miss = (d_rd && ~d_vld);
-    
-    always_ff @(posedge clk, negedge rst_n)
-        if(!rst_n) begin
-            i_rd_req <= 0;
-            d_rd_req <= 0;
-            d_wr_req <= 0;
-        end
-        else if(clr_req) begin
-            i_rd_req <= 0;
-            d_rd_req <= 0;
-            d_wr_req <= 0;
-        end
-        else if(i_rd)
-            i_rd_req <= 1;
-        else if(d_rd)
-            d_rd_req <= 1;
-        else if(d_wr)
-            d_wr_req <= 1;
 
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n)
@@ -98,25 +80,36 @@ module cache_ctrl(
 
         case(state)
             // wait for processor request
-            IDLE: begin
-                if(i_rd|d_rd|d_wr)
-                    nxt_state = COMPARE;
+            default: begin
+                if(d_rd|d_wr)
+                    nxt_state = D_COMPARE;
+                else if(i_rd)
+                    nxt_state = I_COMPARE;
             end
 
             // check cache line (segfault occurs at MMU)
-            COMPARE: begin
+            I_COMPARE: begin
                 // check tag if match and valid
-                if(i_addr[9:0] == i_idx && i_vld) begin
-                    nxt_state = ALLOC;
+                if(i_addr[8:0] == i_idx && i_vld) begin
+                    nxt_state = I_ALLOC;
                 end
+                else 
             end
             
-            ALLOC: begin
+            I_ALLOC: begin
                 
             end
             
-            WRITEBACK: begin
+            I_WRITEBACK: begin
             
+            end
+            
+            // check cache line (segfault occurs at MMU)
+            D_COMPARE: begin
+                if(d_addr[8:0] == d_idx && d_vld) begin
+                    
+                end
+                
             end
     end
 endmodule

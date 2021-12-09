@@ -41,9 +41,14 @@ module MMU(
         .rst_n(rst_n),
 
     );
-    cache_ctrl iCC();
+    cache_ctrl iCC(
+        .clk(clk),
+        .rst_n(rst_n),
+        .i_miss(i_miss),
+        
+    );
     	
-/*         IDLE = 2'b00,
+/*      IDLE = 2'b00,
 		READ = 2'b01,
 		WRITE = 2'b11  */
 

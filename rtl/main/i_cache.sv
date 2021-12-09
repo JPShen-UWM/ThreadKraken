@@ -24,7 +24,7 @@ module i_cache(
     output logic [31:0] i_addr,
     output logic        i_miss,
     output logic        atomic,
-    output logic        i_cache_seg_fault,  // assert when trying to access out of range
+    // output logic        i_cache_seg_fault,  // assert when trying to access out of range
     output logic        vld
     output logic [8:0]  index;
 );
@@ -42,15 +42,12 @@ module i_cache(
             for(int i = 0; i < 512; i = i + 1)
                 mem[i] <= 33'h0;
         end
-        // else if(rd_en && ~i_cache_seg_fault) begin
-        //     line <= mem[index][32:0];
-        // end // this is one cycle delay
         else if(wr_en && ~i_cache_seg_fault) begin
             for(int i = 0; i < 16; i = i + 1)
                 mem[index+i] <= {1'b1,wr_ins[i]};
         end
     
-    // read/write must be in range of valid addresses
+/*     // read/write must be in range of valid addresses
     always_comb begin
         // default outputs
         seg_f_en = 0;
@@ -72,10 +69,11 @@ module i_cache(
         if(!rst_n)
             i_cache_seg_fault <= 0;
         else if((rd_en|wr_en) && seg_f_en)
-            i_cache_seg_fault <= 1;
+            i_cache_seg_fault <= 1; 
 
     // cache miss
     // assign i_miss = (rd_en && ~mem[index][32]);
+*/
 
     // atomic ins.
     assign atomic = ins[0];
