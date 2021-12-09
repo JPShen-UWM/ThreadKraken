@@ -26,10 +26,11 @@ module i_cache(
     output logic        atomic,
     output logic        i_cache_seg_fault,  // assert when trying to access out of range
     output logic        vld
+    output logic [8:0]  index;
 );
     logic [32:0]        mem[0:511];        // {valid,ins[31:0]}
     logic [32:0]        line;
-    logic [8:0]         index;
+
     logic               seg_f_en;
     
     // cache is large enough for everything in memory so only index bits
@@ -74,7 +75,7 @@ module i_cache(
             i_cache_seg_fault <= 1;
 
     // cache miss
-    assign i_miss = (rd_en && ~mem[index][32]);
+    // assign i_miss = (rd_en && ~mem[index][32]);
 
     // atomic ins.
     assign atomic = ins[0];

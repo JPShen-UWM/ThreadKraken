@@ -217,13 +217,13 @@ module afu
         .running        (running)           ,
         .trd_of         (trd_of)            ,
         .trd_full       (trd_full)
-);
+    );
 
     MMU
     iMMU(
         .clk            (clk)               ,
         .rst_n          (~rst)              ,
-        /////////// MMU interface ///////////
+        ///////// core-MMU interface ////////
         .i_addr         (i_addr)            ,
         .i_rd           (i_rd)              ,
         .i_trd          (i_trd)             ,
@@ -238,6 +238,11 @@ module afu
         .d_rd_data      (d_rd_data)         ,
         .d_miss         (d_miss)            ,
         .d_segfault     (d_segfault)        ,
+        /////////////////////////////////////
+        .tx_done        (tx_done)           ,
+        .ready          (ready)             ,
+        .mem_op         (mem_op)            ,
+        .cpu_addr       (cpu_addr)
     );
 
    // Address Translation module

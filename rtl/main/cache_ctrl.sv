@@ -20,19 +20,25 @@ module cache_ctrl(
     input   logic           d_wr        ,
     
     output          [31:0]  d_rd_data   ,
-    output                  d_miss      
+    output                  d_miss      ,
+    
+    // mem_ctrl status
+    input   logic           tx_done     ,       // host done with read/write
+    input   logic           ready               // host ready for read/write
 );
     /////////////////////////////////////// internal signals ///////////////////////////////////////
     logic i_rd_req;
+    logic i_wr_req;
     logic d_rd_req;
     logic d_wr_req;
-
+    logic [8:0] i_idx;
+    logic [8:0] d_idx;
 
     ////////////////////////////////////////// sm signals //////////////////////////////////////////
     logic clr_req;
     logic i_vld;
     logic d_vld;
-    logic rdy;
+    logic cache_rdy;
 
     typedef enum logic [1:0] {IDLE, COMPARE, ALLOC, WRITEBACK} state_t;
     state_t state, nxt_state;
@@ -48,14 +54,19 @@ module cache_ctrl(
 
         .ins        (i_rd_data)     ,
         //.i_addr    (),
-        .i_miss     ()              ,
+        //.i_miss     ()              ,
         .atomic     ()              ,
         .i_cache_seg_fault()      ,  // assert when trying to access out of range
-        .vld    (i_vld)
+        .vld        (i_vld)         ,
+        .index      (i_idx)
     );
     
     d_cache dMEMC(
+        
     );
+    
+    assign i_miss = (i_rd && ~i_vld) | (d_rd|d_wr);
+    assign d_miss = (d_rd && ~d_vld);
     
     always_ff @(posedge clk, negedge rst_n)
         if(!rst_n) begin
@@ -94,10 +105,18 @@ module cache_ctrl(
 
             // check cache line (segfault occurs at MMU)
             COMPARE: begin
-                if(i_rd_req && i_vld) begin
+                // check tag if match and valid
+                if(i_addr[9:0] == i_idx && i_vld) begin
                     nxt_state = ALLOC;
                 end
+            end
+            
+            ALLOC: begin
                 
+            end
+            
+            WRITEBACK: begin
+            
             end
     end
 endmodule

@@ -21,6 +21,7 @@ module UART(
     input   logic           clr_wr_rdy  ,       // clear 0x03 upon successful write
 
     input   logic   [31:0]  rd_data     ,
+    input   logic   [31:0]  host_to_common_rd_data     ,
     output  logic   [31:0]  common_to_host_wr_data     ,
 
     output  logic   [1:0]   mem_op
@@ -50,8 +51,8 @@ module UART(
             uart_mem[3] <= '0;
         end
         else begin
-            uart_mem[2] <= 
-            uart_mem[]
+            uart_mem[0] <= host_to_common_rd_data;
+            uart_mem[2] <= common_to_host_wr_data;
         end
 
 
@@ -75,7 +76,17 @@ module UART(
             end
 
             RDY: begin
-
+                if(uart_mem[1] || uart_mem[4])
+                    nxt_state = TX;
+            end
+            
+            TX: begin
+                if(uart_mem[1]) begin
+                    
+                end
+                else if(uart_mem[3]) begin
+                
+                end
             end
 
         endcase
