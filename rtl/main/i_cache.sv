@@ -22,7 +22,6 @@ module i_cache(
 
     output logic [31:0] ins,
     output logic        i_miss,
-    output logic        atomic,
     output logic        vld,
     output logic [8:0]  index
 );
