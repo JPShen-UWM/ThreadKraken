@@ -25,6 +25,9 @@ module mem_ctrl_tb();
 
 	logic [ADDR_BITCOUNT-1:0] corrected_address;
 
+	logic host_rgo;
+	logic host_wgo;
+
 	logic ready;
 	logic tx_done;
 	logic rd_valid;
@@ -74,6 +77,13 @@ module mem_ctrl_tb();
 
 		op = 2'b01; // read
 		cl_tester = $urandom();
+		@(posedge clk);
+		@(posedge clk);
+		@(posedge clk);
+		@(posedge clk);
+		@(posedge clk);
+		@(posedge clk);
+		@(posedge clk);
 		host_rd_ready = 1'b1;
 		host_data_bus_read_in = cl_tester;
 		raw_address = $urandom();
