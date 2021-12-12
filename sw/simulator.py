@@ -490,7 +490,7 @@ class Simulator:
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
         
-        print(cur_thrd)
+        # print(cur_thrd)
         # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
         # print(tmp)
       return
@@ -578,22 +578,6 @@ if __name__ == '__main__':
   s = Simulator()
   s.run('./test_cases/test_input.asm')
 
-  a = int('0xFFFFF0FF',16)
-  b = int('0x0FFFFFF0',16)
-  # print(a)
-  # print(a<b)
-  # print(twos_comp_less_than(a,b))
-  # b = 7
-  # print(hex(a),hex(b))
-  # a = bindigits(a,32)
-  # b = bindigits(b,32)
-  # c = full_adder(a, b)
-  
-  # print('a:', a)
-  # print('b:', b)
-  # print('c:', c)
-  # print(imm_to_bin('248', 32,1))
-  # print( len(c))
   
 
 

@@ -18,7 +18,7 @@ module decode
     output  logic           wr_en       ,
     output  logic   [2:0]   alu_op      ,
     output  logic   [1:0]   mem_ctrl    ,
-    output  logic   [1:0]   trd_ctrl    ,
+    output  logic   [2:0]   trd_ctrl    ,
     output  logic           wb_sel      ,
     output  logic           init        ,
     output  logic           exp_jmp     ,
@@ -37,9 +37,10 @@ module decode
     // 10: write
 
     // trd_ctrl:
-    // 01: sleep
-    // 10: wake
-    // 11: kill
+    // 001: sleep
+    // 010: wake
+    // 011: kill
+    // 111: init_trd
 
     // i_type:
     // 0: data_b as Bin
@@ -61,7 +62,7 @@ module decode
 
     assign imm = ins[25:10];
     assign reg_rd_a = ins[26:22];
-    assign reg_rd_b = (ins[4:1]==BRANCH | ins[4:1]==MEMOP)? ins[31:27] : ins[21:17];
+    assign reg_rd_b = (ins[4:1]==BRANCH | ins[4:1]==MEMOP | ins[4:1]==LOADI)? ins[31:27] : ins[21:17];
     assign reg_wr = ins[31:27];
     assign alu_op = ins[7:5];
 
@@ -126,6 +127,7 @@ module decode
                 if(funct == 3'b111) begin
                     wr_en = 1;
                     init = 1;
+                    trd_ctrl = 7;
                 end
                 else if(funct == 3'b101) trd_ctrl = 1;
                 else if(funct == 3'b010) trd_ctrl = 2;

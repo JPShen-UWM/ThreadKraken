@@ -60,17 +60,17 @@ module threadkraken_top(
     // ins for each stage
     logic [31:0] ins_exe, ins_mem, ins_wb;
     // Thread op
-    logic kill, sleep, wake, init_trd_dec, init_trd_exe;
+    logic kill, sleep, wake, init_wb;
     logic [2:0] obj_trd_mem, obj_trd_wb;
     // New thread
-    logic [2:0] new_trd_id, new_trd_exe;
+    logic [2:0] new_trd;
     // Flush
-    logic flushID, flushEX, flushMEM;
+    logic flushID, flushEX, flushMEM, flushWB;
     // Register read and write
     logic [31:0] data_a_exe, data_b_exe;
     logic [4:0] reg_rd_a_exe, reg_rd_b_exe;
     logic [4:0] reg_wr_exe, reg_wr_mem, reg_wr_wb;
-    logic wr_en_exe, wr_en_mem, wr_en_wb;
+    logic wr_en_exe, wr_en_mem, wr_en_wb, wr_en_final;
     // Data at each stage
     logic [31:0] exe_data_mem, exe_data_wb;
     logic [31:0] wb_data_wb;
@@ -83,7 +83,7 @@ module threadkraken_top(
     // Memory control
     logic [1:0] mem_ctrl_exe, mem_ctrl_mem;
     // Thread operation control
-    logic [1:0] trd_ctrl_exe, trd_ctrl_mem, trd_ctrl_wb;
+    logic [2:0] trd_ctrl_exe, trd_ctrl_mem, trd_ctrl_wb;
     // Exception jump
     logic exp_jmp_dec, exp_return_dec;
     // Branch jump control
@@ -92,6 +92,9 @@ module threadkraken_top(
     logic i_type_exe;
     // stall for data hazard
     logic stall, stall_req;
+    // Init data
+    logic [31:0] new_pc_mem, new_pc_wb;
+    logic [31:0] new_data_mem, new_data_wb;
 
     assign i_trd = trd_if;
     assign d_trd = trd_mem;
@@ -111,24 +114,24 @@ module threadkraken_top(
         .jmp_pc             (jmp_pc         ),
         .jmp                (jmp_en         ),
         .d_miss             (d_miss         ),
-        .d_miss_pc          (pc_mem         ),
-        .d_miss_trd         (trd_mem        ),
+        .d_miss_pc          (pc_wb          ),
+        .d_miss_trd         (trd_wb         ),
         .i_data             (i_rd_data      ),
         .i_miss             (i_miss         ),
         .i_segfault         (i_segfault     ),
         .kill               (kill           ),
         .slp                (sleep          ),
         .wake               (wake           ),
-        .init_trd           (init_trd_dec   ),
+        .init_trd           (init_wb        ),
         .act_trd            (trd_wb         ),
         .obj_trd            (obj_trd_wb     ),
-        .init_pc            (data_a_exe     ),
+        .init_pc            (new_pc_wb      ),
         .stall              (stall          ),
         .jmp_exp            (exp_jmp_dec    ),
         .return_op          (exp_return_dec ),
 
         .pc_dec             (pc_dec         ),
-        .new_trd            (new_trd_id     ),
+        .new_trd            (new_trd        ),
         .trd_if             (trd_if         ),
         .trd_dec            (trd_dec        ),
         .flushIF            (flushIF        ),
@@ -163,6 +166,7 @@ module threadkraken_top(
         .flushID    (flushID    ),
         .flushMEM   (flushMEM   ),
         .flushIF    (flushIF    ),
+        .flushWB    (flushWB    ),
         .stall      (stall      )
     );
 
@@ -173,7 +177,6 @@ module threadkraken_top(
         .rst_n              (rst_n          ),
 
         .ins_dec            (i_rd_data      ),
-        .new_trd_id         (new_trd_id     ),
         .trd_dec            (trd_dec        ),
         .pc_dec             (pc_dec         ),
         .flushID            (flushID        ),
@@ -182,7 +185,10 @@ module threadkraken_top(
         .wr_trd_wb          (trd_wb         ),
         .data_wb            (wb_data_wb     ),
         .wr_reg_wb          (reg_wr_wb      ),
-        .wr_en_wb           (wr_en_wb       ),
+        .wr_en_final        (wr_en_final    ),
+        .new_trd_wb         (new_trd        ),
+        .init_wb            (init_wb        ),
+        .init_data_wb       (new_data_wb    ),
 
         // Register         
         .data_a_exe         (data_a_exe     ),
@@ -206,9 +212,7 @@ module threadkraken_top(
         .exp_return_dec     (exp_return_dec ),
         .jmp_con_exe        (jmp_con_exe    ),
         .invalid_op         (inv_op         ),
-        .i_type_exe         (i_type_exe     ),
-        .init_trd_exe       (init_trd_exe   ),
-        .new_trd_exe        (new_trd_exe    )
+        .i_type_exe         (i_type_exe     )
     );
 
     exe EXE
@@ -234,8 +238,6 @@ module threadkraken_top(
         .reg_wr_wb          (reg_wr_wb      ),
         .wb_data_wb         (wb_data_wb     ),
         .wr_en_wb           (wr_en_wb       ),
-        .new_trd_exe        (new_trd_exe    ),
-        .init_trd_exe       (init_trd_exe   ),
         .mem_ctrl_exe       (mem_ctrl_exe   ),
         .trd_ctrl_exe       (trd_ctrl_exe   ),
         .wr_en_exe          (wr_en_exe      ),
@@ -252,6 +254,9 @@ module threadkraken_top(
         .mem_ctrl_mem       (mem_ctrl_mem   ),
         .trd_ctrl_mem       (trd_ctrl_mem   ),
         .obj_trd_mem        (obj_trd_mem    ),
+        .new_pc_mem         (new_pc_mem     ),
+        .new_data_mem       (new_data_mem   ),
+
         .jmp_pc_exe         (jmp_pc         ),
         .jmp_en_exe         (jmp_en         ),
         .stall_exe          (stall_req      ), 
@@ -275,6 +280,8 @@ module threadkraken_top(
         .obj_trd_mem        (obj_trd_mem    ),
         .flushMEM           (flushMEM       ),
         .d_miss             (d_miss         ),
+        .new_pc_mem         (new_pc_mem     ),
+        .new_data_mem       (new_data_mem   ),
 
         .ins_wb             (ins_wb         ),
         .pc_wb              (pc_wb          ),
@@ -285,6 +292,8 @@ module threadkraken_top(
         .trd_ctrl_wb        (trd_ctrl_wb    ),
         .obj_trd_wb         (obj_trd_wb     ),
         .wb_sel_wb          (wb_sel_wb      ),
+        .new_pc_wb          (new_pc_wb      ),
+        .new_data_wb        (new_data_wb    ),
 
         .d_rd               (d_rd           ),
         .d_wr               (d_wr           ),
@@ -296,11 +305,16 @@ module threadkraken_top(
         .trd_ctrl_wb        (trd_ctrl_wb    ),
         .wb_sel_wb          (wb_sel_wb      ),
         .d_rd_data          (d_rd_data      ),
+        .flushWB            (flushWB        ),
+        .wr_en_wb           (wr_en_wb       ),
+        .new_trd            (new_trd        ),
 
         .wb_data_wb         (wb_data_wb     ),
         .kill               (kill           ),
         .sleep              (sleep          ),
-        .wake               (wake           )
+        .wake               (wake           ),
+        .wr_en_final        (wr_en_final    ),
+        .init_wb            (init_wb        )
     );
 
 endmodule

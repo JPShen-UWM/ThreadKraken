@@ -19,7 +19,7 @@ module regfile #( parameter TRD_ID = 0 )
     input           [2:0]   wr_trd      ,
     input           [31:0]  wr_data     ,
     input                   init        ,
-    input           [2:0]   init_trd    ,
+    input           [2:0]   new_trd     ,
     input           [31:0]  init_data   ,
 
     output  logic   [31:0]  data_a      ,
@@ -33,11 +33,31 @@ module regfile #( parameter TRD_ID = 0 )
         if(!rst_n) begin
             data[0] <= 32'h000;
             data[1] <= TRD_ID;
-            for(int i = 2; i<32; i++) begin
+            case(TRD_ID)
+                0: data[2] <= TRD0_INIT_ESP;
+                1: data[2] <= TRD1_INIT_ESP;
+                2: data[2] <= TRD2_INIT_ESP;
+                3: data[2] <= TRD3_INIT_ESP;
+                4: data[2] <= TRD4_INIT_ESP;
+                5: data[2] <= TRD5_INIT_ESP;
+                6: data[2] <= TRD6_INIT_ESP;
+                7: data[2] <= TRD7_INIT_ESP;
+            endcase
+            case(TRD_ID)
+                0: data[3] <= TRD0_INIT_ESP;
+                1: data[3] <= TRD1_INIT_ESP;
+                2: data[3] <= TRD2_INIT_ESP;
+                3: data[3] <= TRD3_INIT_ESP;
+                4: data[3] <= TRD4_INIT_ESP;
+                5: data[3] <= TRD5_INIT_ESP;
+                6: data[3] <= TRD6_INIT_ESP;
+                7: data[3] <= TRD7_INIT_ESP;
+            endcase
+            for(int i = 4; i<32; i++) begin
                 data[i] <= 32'b0;
             end
         end
-        else if(init & init_trd == TRD_ID) begin
+        else if(init & new_trd == TRD_ID) begin
             data[0] <= 32'h000;
             data[1] <= TRD_ID;
             case(TRD_ID)

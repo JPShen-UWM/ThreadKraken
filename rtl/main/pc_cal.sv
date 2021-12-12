@@ -52,11 +52,11 @@ module pc_cal(
                 end
             end
             4'b0111: begin
-                jmp_pc = data_a + imm_ext;
+                jmp_pc = cur_pc + 1 + imm_ext;
                 jmp_en = 1;
             end
             4'b1111: begin
-                jmp_pc = cur_pc + 1 + imm_ext;
+                jmp_pc = data_a + imm_ext;
                 jmp_en = 1;
             end
         endcase

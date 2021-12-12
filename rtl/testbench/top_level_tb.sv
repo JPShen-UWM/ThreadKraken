@@ -7,9 +7,9 @@
 **/
 `include "../main/header.svh"
 module top_level_tb();
-    parameter mem_miss = 0; // 1 to simulate cache miss
-    parameter test_path = "../sw/test_cases/add1.o";
-    parameter MAX_CYCLE = 20;
+    parameter mem_miss = 1; // 1 to simulate cache miss
+    //parameter test_path = "../sw/test_cases/add1.o";
+    parameter MAX_CYCLE = 200;
 
 
     logic           clk         ;
@@ -60,14 +60,14 @@ module top_level_tb();
     logic [2:0] obj_trd, act_trd, par_trd;
 
     assign reg_wr = DUT.reg_wr_wb;
-    assign reg_wr_en = DUT.wr_en_wb;
+    assign reg_wr_en = DUT.wr_en_final;
     assign data_wr = DUT.wb_data_wb;
     assign trd_wr = DUT. trd_wb;
     assign kill = DUT.kill;
     assign sleep = DUT.sleep;
     assign wake = DUT.wake;
     assign init = DUT.INSFETCH.THREAD_CTRL.init;
-    assign new_trd = DUT.new_trd_id;
+    assign new_trd = DUT.new_trd;
     assign obj_trd = DUT.obj_trd_wb;
     assign act_trd = DUT.trd_wb;
     assign par_trd = DUT.trd_dec;
@@ -114,45 +114,88 @@ module top_level_tb();
     always #5 clk = ~clk;
 
     generate
-    no_miss_mem #("../sw/test_cases/mem1.o") NO_MISS_MEM 
-    (
-        .clk            (clk         ),
-        .rst_n          (rst_n       ),
-        .i_addr         (i_addr      ),
-        .i_rd           (i_rd        ),
-        .i_trd          (i_trd       ),
-        .i_rd_data      (i_rd_data   ),
-        .i_miss         (i_miss      ),
-        .i_segfault     (i_segfault  ),
-        .d_addr         (d_addr      ),
-        .d_wr_data      (d_wr_data   ),
-        .d_rd           (d_rd        ),
-        .d_wr           (d_wr        ),
-        .d_trd          (d_trd       ),
-        .d_rd_data      (d_rd_data   ),
-        .d_miss         (d_miss      ),
-        .d_segfault     (d_segfault  ),
-        .child_0        (child_0     ),
-        .child_1        (child_1     ),
-        .child_2        (child_2     ),
-        .child_3        (child_3     ),
-        .child_4        (child_4     ),
-        .child_5        (child_5     ),
-        .child_6        (child_6     ),
-        .child_7        (child_7     ),
-        .alu_exp        (alu_exp     ),
-        .alu_trd        (alu_trd     ),
-        .inv_op         (inv_op      ),
-        .inv_op_trd     (inv_op_trd  ),
-        .insfetch_trd   (insfetch_trd),
-        .breakpoint     (breakpoint  ),
-        .bp_trd         (bp_trd      ),
-        .valid_trd      (valid_trd   ),
-        .run_trd        (run_trd     ),
-        .running        (running     ),
-        .trd_of         (trd_of      ),
-        .trd_full       (trd_full    )
-    );
+        if(!mem_miss) begin
+            no_miss_mem #("../sw/thread_test_cases/thread_test1.o") NO_MISS_MEM 
+            (
+                .clk            (clk         ),
+                .rst_n          (rst_n       ),
+                .i_addr         (i_addr      ),
+                .i_rd           (i_rd        ),
+                .i_trd          (i_trd       ),
+                .i_rd_data      (i_rd_data   ),
+                .i_miss         (i_miss      ),
+                .i_segfault     (i_segfault  ),
+                .d_addr         (d_addr      ),
+                .d_wr_data      (d_wr_data   ),
+                .d_rd           (d_rd        ),
+                .d_wr           (d_wr        ),
+                .d_trd          (d_trd       ),
+                .d_rd_data      (d_rd_data   ),
+                .d_miss         (d_miss      ),
+                .d_segfault     (d_segfault  ),
+                .child_0        (child_0     ),
+                .child_1        (child_1     ),
+                .child_2        (child_2     ),
+                .child_3        (child_3     ),
+                .child_4        (child_4     ),
+                .child_5        (child_5     ),
+                .child_6        (child_6     ),
+                .child_7        (child_7     ),
+                .alu_exp        (alu_exp     ),
+                .alu_trd        (alu_trd     ),
+                .inv_op         (inv_op      ),
+                .inv_op_trd     (inv_op_trd  ),
+                .insfetch_trd   (insfetch_trd),
+                .breakpoint     (breakpoint  ),
+                .bp_trd         (bp_trd      ),
+                .valid_trd      (valid_trd   ),
+                .run_trd        (run_trd     ),
+                .running        (running     ),
+                .trd_of         (trd_of      ),
+                .trd_full       (trd_full    )
+            );
+        end
+        else begin
+            miss_mem #("../sw/thread_test_cases/thread_test1.o") MISS_MEM 
+            (
+                .clk            (clk         ),
+                .rst_n          (rst_n       ),
+                .i_addr         (i_addr      ),
+                .i_rd           (i_rd        ),
+                .i_trd          (i_trd       ),
+                .i_rd_data      (i_rd_data   ),
+                .i_miss         (i_miss      ),
+                .i_segfault     (i_segfault  ),
+                .d_addr         (d_addr      ),
+                .d_wr_data      (d_wr_data   ),
+                .d_rd           (d_rd        ),
+                .d_wr           (d_wr        ),
+                .d_trd          (d_trd       ),
+                .d_rd_data      (d_rd_data   ),
+                .d_miss         (d_miss      ),
+                .d_segfault     (d_segfault  ),
+                .child_0        (child_0     ),
+                .child_1        (child_1     ),
+                .child_2        (child_2     ),
+                .child_3        (child_3     ),
+                .child_4        (child_4     ),
+                .child_5        (child_5     ),
+                .child_6        (child_6     ),
+                .child_7        (child_7     ),
+                .alu_exp        (alu_exp     ),
+                .alu_trd        (alu_trd     ),
+                .inv_op         (inv_op      ),
+                .inv_op_trd     (inv_op_trd  ),
+                .insfetch_trd   (insfetch_trd),
+                .breakpoint     (breakpoint  ),
+                .bp_trd         (bp_trd      ),
+                .valid_trd      (valid_trd   ),
+                .run_trd        (run_trd     ),
+                .running        (running     ),
+                .trd_of         (trd_of      ),
+                .trd_full       (trd_full    )
+            );
+        end
     endgenerate
 
     threadkraken_top DUT

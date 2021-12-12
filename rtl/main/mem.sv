@@ -19,10 +19,12 @@ module mem(
     input                   wr_en_mem   ,
     input                   wb_sel_mem  ,
     input           [1:0]   mem_ctrl_mem,
-    input           [1:0]   trd_ctrl_mem,
+    input           [2:0]   trd_ctrl_mem,
     input           [2:0]   obj_trd_mem ,
     input                   flushMEM    ,
     input                   d_miss      ,
+    input           [31:0]  new_pc_mem  ,
+    input           [31:0]  new_data_mem,
 
     output  logic   [31:0]  ins_wb      ,
     output  logic   [31:0]  pc_wb       ,
@@ -30,9 +32,11 @@ module mem(
     output  logic   [2:0]   trd_wb      ,
     output  logic   [4:0]   reg_wr_wb   ,
     output  logic           wr_en_wb    ,
-    output  logic   [1:0]   trd_ctrl_wb ,
+    output  logic   [2:0]   trd_ctrl_wb ,
     output  logic   [2:0]   obj_trd_wb  ,
     output  logic           wb_sel_wb   ,
+    output  logic   [31:0]  new_pc_wb   ,
+    output  logic   [31:0]  new_data_wb ,
 
     output  logic           d_rd        ,
     output  logic           d_wr        ,
@@ -43,8 +47,8 @@ module mem(
     // 01: read
     // 10: write
 
-    assign d_rd = mem_ctrl_mem[0];
-    assign d_wr = mem_ctrl_mem[1];
+    assign d_rd = mem_ctrl_mem[0] & !flushMEM;
+    assign d_wr = mem_ctrl_mem[1] & !flushMEM;
     assign d_wr_data = exe_data_mem;
     
     always_ff @(posedge clk, negedge rst_n) begin
@@ -58,6 +62,8 @@ module mem(
             trd_ctrl_wb <= 0;
             obj_trd_wb  <= 0;
             wb_sel_wb   <= 0;
+            new_pc_wb   <= 0;
+            new_data_wb <= 0;
         end
         else begin
             ins_wb      <= ins_mem;
@@ -69,6 +75,8 @@ module mem(
             trd_ctrl_wb <= trd_ctrl_mem;
             obj_trd_wb  <= obj_trd_mem;
             wb_sel_wb   <= wb_sel_mem;
+            new_pc_wb   <= new_pc_mem;
+            new_data_wb <= new_data_mem;
         end
     end
 
