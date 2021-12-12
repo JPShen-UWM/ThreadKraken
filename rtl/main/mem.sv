@@ -5,7 +5,7 @@
  * Dependency:
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module mem(
     input                   clk         ,
     input                   rst_n       ,

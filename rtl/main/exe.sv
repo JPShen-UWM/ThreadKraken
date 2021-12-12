@@ -5,7 +5,7 @@
  * Dependency: alu, pc_cal
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module exe(
     input                   clk         ,
     input                   rst_n       ,

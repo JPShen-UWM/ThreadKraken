@@ -5,7 +5,7 @@
  * Dependency:
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module wb(
     input           [31:0]  exe_data_wb ,
     input           [2:0]   trd_ctrl_wb ,
