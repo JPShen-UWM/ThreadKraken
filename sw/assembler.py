@@ -6,7 +6,7 @@
 # -h: human read format, debug use
 # -o: specify output file name, otherwise: output.o
 import sys
-import collections
+import binascii
 import re
 
 #arithmetic extension s to n bit
@@ -501,6 +501,7 @@ class Assembler:
         self.programStack = []
         self.manRead = False
         self.binaryFormat = False
+        self.char = False
 
     def setOffset(self, addr):
         self.ADDR_OFFSET = addr
@@ -514,7 +515,8 @@ class Assembler:
     def compile(self, inFilename, outFilename='./output.o'):
         print("compile %s" %inFilename)
         self.firstRoundProcessing(inFilename)
-
+        if outFilename == None:
+          outFilename = './output.o'
         self.processProgram(outFilename)
         print("Compile complete")
 
@@ -539,9 +541,14 @@ class Assembler:
         return
 
     def processProgram(self, filename):
-        with open(filename, 'w') as outfile:
+
+        with open(filename, 'w', encoding='utf-8') as outfile:
           for line in self.programStack:
             binaryCmd = self.processCmd(line)
+            if self.char: 
+              
+              outfile.write(binaryCmd)
+              continue
             if not self.manRead:
               outfile.write(binaryCmd + '\n')
             else:
@@ -580,7 +587,18 @@ class Assembler:
         retStr = retStr[:-1] + atomic
         dec = int(retStr,2)
         hexStr = l_ext(hex(dec),8)
-        return hexStr if not self.binaryFormat else retStr
+        if self.char:
+          ret = ''
+          for i in range(4):
+            cur = retStr[(i*8):min((8+i*8),32)]
+            if cur:
+              ret += chr(int(cur,2))
+            else: 
+              ret += chr(0)
+
+          return ret
+        else:
+          return hexStr if not self.binaryFormat else retStr
 
 
 
@@ -593,5 +611,12 @@ if __name__ == "__main__":
       asm.setBinaryFormat(True)
     if '-o' in sys.argv:
       outFilename = sys.argv[sys.argv.index('-o') + 1]
+    if '-a' in sys.argv:
+      asm.char = True
+
+    # print(chr(0))
+    # s = b'\0asdf'
+    # print(s)
+    # print(binascii.b2a_uu(s))
     asm.compile(sys.argv[1], outFilename)
-    print('labels used: {asm.labels}')
+  
