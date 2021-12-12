@@ -5,7 +5,7 @@
  * Dependency: decode, regfile_set, regfile
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module insdec
 (
     input                   clk             ,

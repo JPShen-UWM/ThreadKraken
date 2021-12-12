@@ -5,7 +5,7 @@
  * Dependency: alu, pc_cal
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module exe(
     input                   clk         ,
     input                   rst_n       ,
@@ -77,7 +77,7 @@ module exe(
                 if(reg_rd_a_exe == reg_wr_mem & |reg_wr_mem) data_a_for = exe_data_mem;
             end
         end
-        else if(trd_mem == trd_wb & wr_en_wb) begin
+        else if(trd_exe == trd_wb & wr_en_wb) begin
             if(reg_rd_a_exe == reg_wr_wb & |reg_wr_wb) data_a_for = wb_data_wb;
         end
 
@@ -90,7 +90,7 @@ module exe(
                 if(reg_rd_b_exe == reg_wr_mem & |reg_wr_mem) data_b_for = exe_data_mem;
             end
         end
-        else if(trd_mem == trd_wb & wr_en_wb) begin
+        else if(trd_exe == trd_wb & wr_en_wb) begin
             if(reg_rd_b_exe == reg_wr_wb & |reg_wr_wb) data_b_for = wb_data_wb;
         end
     end

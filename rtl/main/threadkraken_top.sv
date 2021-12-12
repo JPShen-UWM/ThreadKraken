@@ -6,7 +6,7 @@
  * pc_sel.sv, regfile_set.sv, regfile.sv, thread_csr.sv, thread_ctrl.sv, wb.sv
  * Status: developing
 **/
-`include "header.svh"
+//`include "header.svh"
 module threadkraken_top(
     input                   clk         ,
     input                   rst_n       ,
