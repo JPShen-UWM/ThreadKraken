@@ -97,7 +97,8 @@ module memory_map
 
    // ============================================================= 
    // MMIO read code
-   // ============================================================= 	    
+   // =============================================================
+   /* 	    
    always_ff @(posedge clk or posedge rst) begin
 	if(rst) begin
 	    mmio.rd_data <= '0;
@@ -111,4 +112,5 @@ module memory_map
            end 
 	end
    end
+   */
 endmodule
