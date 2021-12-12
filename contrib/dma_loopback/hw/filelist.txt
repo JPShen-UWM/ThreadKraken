@@ -27,5 +27,6 @@ ccip_std_afu.sv
 ../../../rtl/main/mmu.sv
 ../../../rtl/main/i_cache.sv
 ../../../rtl/main/d_cache.sv
+../../../rtl/main/threadkraken_top.sv
 
 QI:afu.qsf

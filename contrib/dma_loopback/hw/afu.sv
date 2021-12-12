@@ -159,7 +159,7 @@ module afu
     logic           trd_of      ;
     logic           trd_full    ;
 
-   threadkraken_top DUT
+   threadkraken_top CPU
     (
         .clk            (clk         ),
         .rst_n          (~rst        ),
