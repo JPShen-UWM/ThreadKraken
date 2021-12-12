@@ -10,8 +10,22 @@ afu.sv
 csr_mgr.sv
 hal.sv
 ccip_std_afu.sv
-../../../rtl/mem_ctrl.sv
-../../../rtl/cpu.sv
 ../../../rtl/addr_tr_unit.sv
+../../../rtl/main/alu.sv
+../../../rtl/main/decode.sv
+../../../rtl/main/exe.sv
+../../../rtl/main/insdec.sv
+../../../rtl/main/insfetch.sv
+../../../rtl/main/mem.sv
+../../../rtl/main/pc_cal.sv
+../../../rtl/main/pc_sel.sv
+../../../rtl/main/regfile_set.sv
+../../../rtl/main/regfile.sv
+../../../rtl/main/thread_csr.sv 
+../../../rtl/main/thread_ctrl.sv
+../../../rtl/main/wb.sv
+../../../rtl/main/mmu.sv
+../../../rtl/main/i_cache.sv
+../../../rtl/main/d_cache.sv
 
 QI:afu.qsf

@@ -70,14 +70,14 @@
 `include "cci_mpf_if.vh"
 
 module afu 
-  (
-   input clk,
-   input rst,
-	 mmio_if.user mmio,
-	 dma_if.peripheral dma
-   );
+    (
+    input   clk,
+    input   rst,
+	    mmio_if.user mmio,
+	    dma_if.peripheral dma
+    );
 
-   localparam int CL_ADDR_WIDTH = $size(t_ccip_clAddr);
+    localparam int CL_ADDR_WIDTH = $size(t_ccip_clAddr);
       
    // I want to just use dma.count_t, but apparently
    // either SV or Modelsim doesn't support that. Similarly, I can't
@@ -86,57 +86,118 @@ module afu
    // some tools. Declaring a function within the interface works just fine in
    // some tools, but in Quartus I get an error about too many ports in the
    // module instantiation.
-   typedef logic [CL_ADDR_WIDTH:0] count_t;   
-   count_t 	size;
-   logic 	go;
-   logic 	done;
+    typedef logic [CL_ADDR_WIDTH:0] count_t;   
+    count_t 	size;
+    logic 	go;
+    logic 	done;
 
    // Software provides 64-bit virtual byte addresses.
    // Again, this constant would ideally get read from the DMA interface if
    // there was widespread tool support.
-   localparam int VIRTUAL_BYTE_ADDR_WIDTH = 64;
+    localparam int VIRTUAL_BYTE_ADDR_WIDTH = 64;
 
    // Instantiate the memory map, which provides the starting read/write
    // 64-bit virtual byte addresses, a transfer size (in cache lines), and a
    // go signal. It also sends a done signal back to software.
-   memory_map
-     #(
-       .ADDR_WIDTH(VIRTUAL_BYTE_ADDR_WIDTH)
-       )
-   memory_map (.*);
+    memory_map
+        #(
+            .ADDR_WIDTH(VIRTUAL_BYTE_ADDR_WIDTH)
+        )
+    memory_map (.*);
 
-   wire local_dma_re, local_dma_we;
+    wire local_dma_re, local_dma_we;
 
-   wire [1:0] mem_op;
-   wire [VIRTUAL_BYTE_ADDR_WIDTH-1:0] cpu_addr;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] final_addr;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s0;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s1;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s2;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s3;
-   logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] cv_value;
-   wire tx_done;
-   wire ready;
-   wire rd_valid;
-   wire rd_go;
-   wire wr_go;
+    wire [1:0] mem_op;
+    wire [VIRTUAL_BYTE_ADDR_WIDTH-1:0] cpu_addr;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] final_addr;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s0;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s1;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s2;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] wr_addr_s3;
+    logic [VIRTUAL_BYTE_ADDR_WIDTH-1:0] cv_value;
+    wire tx_done;
+    wire ready;
+    wire rd_valid;
+    wire rd_go;
+    wire wr_go;
 
-   wire [31:0] cpu_in;
-   wire [31:0] cpu_out; // Todo, parameterize
+    wire [31:0] cpu_in;
+    wire [31:0] cpu_out;
 
-   cpu
-   mock
-   (
-       .clk(clk),
-       .rst_n(~rst),
-       .tx_done(tx_done),
-       .rd_valid(rd_valid),
-       .op(mem_op),
-       .io_address(cpu_addr),
-       .common_data_bus_in(cpu_in),
-       .common_data_bus_out(cpu_out),
-       .cv_value(cv_value)
-   );
+    logic   [31:0]  i_addr      ;
+    logic           i_rd        ;
+    logic   [2:0]   i_trd       ;
+    logic   [31:0]  i_rd_data   ;
+    logic           i_miss      ;
+    logic           i_segfault  ;
+    logic   [31:0]  d_addr      ;
+    logic   [31:0]  d_wr_data   ;
+    logic           d_rd        ;
+    logic           d_wr        ;
+    logic   [2:0]   d_trd       ;
+    logic   [31:0]  d_rd_data   ;
+    logic           d_miss      ;
+    logic           d_segfault  ;
+    logic   [7:0]   child_0     ;
+    logic   [7:0]   child_1     ;
+    logic   [7:0]   child_2     ;
+    logic   [7:0]   child_3     ;
+    logic   [7:0]   child_4     ;
+    logic   [7:0]   child_5     ;
+    logic   [7:0]   child_6     ;
+    logic   [7:0]   child_7     ;
+    logic           alu_exp     ;
+    logic   [2:0]   alu_trd     ;
+    logic           inv_op      ;
+    logic   [2:0]   inv_op_trd  ;
+    logic   [2:0]   insfetch_trd;
+    logic           breakpoint  ;
+    logic   [2:0]   bp_trd      ;
+    logic   [7:0]   valid_trd   ;
+    logic   [7:0]   run_trd     ;
+    logic           running     ;
+    logic           trd_of      ;
+    logic           trd_full    ;
+
+   threadkraken_top DUT
+    (
+        .clk            (clk         ),
+        .rst_n          (~rst        ),
+        .i_addr         (i_addr      ),
+        .i_rd           (i_rd        ),
+        .i_trd          (i_trd       ),
+        .i_rd_data      (i_rd_data   ),
+        .i_miss         (i_miss      ),
+        .i_segfault     (i_segfault  ),
+        .d_addr         (d_addr      ),
+        .d_wr_data      (d_wr_data   ),
+        .d_rd           (d_rd        ),
+        .d_wr           (d_wr        ),
+        .d_trd          (d_trd       ),
+        .d_rd_data      (d_rd_data   ),
+        .d_miss         (d_miss      ),
+        .d_segfault     (d_segfault  ),
+        .child_0        (child_0     ),
+        .child_1        (child_1     ),
+        .child_2        (child_2     ),
+        .child_3        (child_3     ),
+        .child_4        (child_4     ),
+        .child_5        (child_5     ),
+        .child_6        (child_6     ),
+        .child_7        (child_7     ),
+        .alu_exp        (alu_exp     ),
+        .alu_trd        (alu_trd     ),
+        .inv_op         (inv_op      ),
+        .inv_op_trd     (inv_op_trd  ),
+        .insfetch_trd   (insfetch_trd),
+        .breakpoint     (breakpoint  ),
+        .bp_trd         (bp_trd      ),
+        .valid_trd      (valid_trd   ),
+        .run_trd        (run_trd     ),
+        .running        (running     ),
+        .trd_of         (trd_of      ),
+        .trd_full       (trd_full    )
+    );
 
    // Address Translation module
    addr_tr_unit
@@ -149,27 +210,58 @@ module afu
        .corrected_address(final_addr)
    );
 
-   // Memory Controller module
-   mem_ctrl
-   memory(
-       .clk(clk),
-       .rst_n(~rst),
-       .host_init(go),
-       .host_rd_ready(~dma.empty),
-       .host_wr_ready(~dma.full & ~dma.host_wr_completed),
-       .op(mem_op), // CPU Defined
-       .common_data_bus_read_in(cpu_out), // CPU data word bus, input
-       .common_data_bus_write_out(cpu_in),
-       .host_data_bus_read_in(dma.rd_data),
-       .host_data_bus_write_out(dma.wr_data),
-       .ready(ready), // Usable for the host CPU
-       .tx_done(tx_done), // Again, notifies CPU when ever a read or write is complete
-       .rd_valid(rd_valid), // Notifies CPU whenever the data on the databus is valid
-       .host_re(local_dma_re),
-       .host_we(local_dma_we),
-       .host_rgo(rd_go),
-       .host_wgo(wr_go)
-   );
+    mmu MMU
+    (
+        .clk                (clk            ),
+        .rst_n              (~rst           ),
+        .i_addr             (i_addr         ),
+        .i_rd               (i_rd           ),
+        .i_trd              (i_trd          ),
+        .i_rd_data          (i_rd_data      ),
+        .i_miss             (i_miss         ),
+        .i_segfault         (i_segfault     ),
+        .d_addr             (d_addr         ),
+        .d_wr_data          (d_wr_data      ),
+        .d_rd               (d_rd           ),
+        .d_wr               (d_wr           ),
+        .d_trd              (d_trd          ),
+        .d_rd_data          (d_rd_data      ),
+        .d_miss             (d_miss         ),
+        .d_segfault         (d_segfault     ),
+        .child_0            (child_0        ),
+        .child_1            (child_1        ),
+        .child_2            (child_2        ),
+        .child_3            (child_3        ),
+        .child_4            (child_4        ),
+        .child_5            (child_5        ),
+        .child_6            (child_6        ),
+        .child_7            (child_7        ),
+        .alu_exp            (alu_exp        ),
+        .alu_trd            (alu_trd        ),
+        .inv_op             (inv_op         ),
+        .inv_op_trd         (inv_op_trd     ),
+        .insfetch_trd       (insfetch_trd   ),
+        .breakpoint         (breakpoint     ),
+        .bp_trd             (bp_trd         ),
+        .valid_trd          (valid_trd      ),
+        .run_trd            (run_trd        ),
+        .running            (running        ),
+        .trd_of             (trd_of         ),
+        .trd_full           (trd_full       ),
+        .host_init          (go             ),
+	    .host_rd_ready      (~dma.empty     ),
+	    .host_wr_ready      (~dma.full & ~dma.host_wr_completed),    
+	    .host_data_bus_read_in(dma.rd_data  ),
+	    .host_data_bus_write_out(dma.wr_data),   
+        .cpu_addr           (cpu_addr       ),
+	    .host_re            (local_dma_re   ),
+	    .host_we            (local_dma_we   ),
+	    .host_rgo           (rd_go          ),
+	    .host_wgo           (wr_go          ),   
+        .mmio_wr_data       (mmio.wr_data   ),
+        .mmio_wr_addr       (mmio.wr_addr   ),
+        .mmio_wr_en         (mmio.wr_en     )
+    );
 
 
    // Assign the starting addresses from the memory map.

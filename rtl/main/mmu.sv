@@ -46,15 +46,11 @@ module mmu
     input           [7:0]   run_trd         ,
     input                   running         ,
     input                   trd_of          ,
-    input                   trd_full
+    input                   trd_full        ,
 
 	input                   host_init       ,
 	input                   host_rd_ready   ,
 	input                   host_wr_ready   ,
-
-
-	input           [31:0]  common_data_bus_read_in, 
-	output  logic   [31:0]  common_data_bus_write_out, 
 
 	input           [511:0] host_data_bus_read_in,
 	output  logic   [511:0] host_data_bus_write_out,
@@ -63,14 +59,20 @@ module mmu
 	output  logic           host_re         ,
 	output  logic           host_we         ,
 	output  logic           host_rgo        ,
-	output  logic           host_wgo
+	output  logic           host_wgo        ,
+
+    output  logic   [31:0]  mmio_wr_data    ,
+    output  logic   [63:0]  mmio_wr_addr    ,
+    output  logic           mmio_wr_en 
 );
 
-    logic [31:0] i_addr, d_addr, i_miss_addr, d_miss_addr;
+    logic [31:0] i_miss_addr, d_miss_addr;
     logic i_rd_req, d_rd_req;
     logic [511:0] host_rd_data;
     logic [31:0] host_rd_addr;
+    logic uart_act;
 
+    assign uart_act = (d_wr|d_rd) & !(|d_addr[31:2]);
 
     assign host_rd_data = host_data_bus_read_in;
 
@@ -93,7 +95,7 @@ module mmu
         else if(running & counting) begin
             cycle_count <= cycle_count + 1;
         end
-        else if(!runing & counting) begin
+        else if(!running & counting) begin
             finish <= 1;
         end
     end
@@ -119,6 +121,7 @@ module mmu
 		host_rgo = 1'b0;
 		host_wgo = 1'b0;
         cpu_addr = 64'b0;
+        host_rd_addr = 0;
         case(state)
             STARTUP: begin
                 if(host_init) nxt_state = READY;
@@ -132,9 +135,42 @@ module mmu
                 end
             end
             IREAD: begin
-                cpu_addr = {30'b0, i_miss_addr, 2'b00};
-                
+                cpu_addr = {46'b0, i_miss_addr[15:0], 2'b00};
+                host_rgo = 1;
+                host_rd_addr = i_miss_addr;
+                if(host_rd_ready) begin
+                    nxt_state = READY;
+                    host_re = 1;
+                end
             end
+            DREAD: begin
+                cpu_addr = {46'b0, d_miss_addr[15:0], 2'b00};
+                host_rgo = 1;
+                host_rd_addr = d_miss_addr;
+                if(host_rd_ready) begin
+                    nxt_state = READY;
+                    host_re = 1;
+                end
+            end
+        endcase
+    end
+
+    always_ff@(posedge clk, negedge rst_n) begin
+        if(!rst_n) begin
+            mmio_wr_data = 0;
+            mmio_wr_addr = 0;
+            mmio_wr_en = 0;
+        end
+        else if(d_wr & !(|d_addr[31:2])) begin
+            mmio_wr_data = d_wr_data;
+            mmio_wr_addr = {45'b0, 1'b1, d_addr[15:0], 2'b00};
+            mmio_wr_en = 1;         
+        end
+        else if(finish) begin
+            mmio_wr_data = cycle_count;
+            mmio_wr_addr = 64'h0010;
+            mmio_wr_en = 1; 
+        end
     end
 
     i_cache I_CACHE
