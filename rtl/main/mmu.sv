@@ -155,13 +155,13 @@ module mmu
 
     always_ff@(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
-            mmio_rd_data = 0;
+            mmio_rd_data <= 0;
         end
         else if(d_wr & !(|d_addr[31:2])) begin
-            mmio_rd_data = d_wr_data;      
+            mmio_rd_data <= d_wr_data;      
         end
         else if(finish) begin
-            mmio_rd_data = {16'hF0F0, cycle_count};
+            mmio_rd_data <= {16'hF0F0, cycle_count};
         end
     end
 
