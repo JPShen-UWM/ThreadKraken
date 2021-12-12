@@ -19,9 +19,9 @@ def compile(files, folder_name):
 				asm.setBinaryFormat(True)
 				asm.setReadableOutput(True)
 				asm.compile(folder_name + file, folder_name + file[:-4]+'.ref')
-				asm = Assembler()
-				asm.char = True
-				asm.compile(folder_name + file, folder_name + file[:-4]+'.txt')
+				# asm = Assembler()
+				# asm.char = True
+				# asm.compile(folder_name + file, folder_name + file[:-4]+'.txt')
 
 def simulate(folder_name):
 	s = Simulator()
