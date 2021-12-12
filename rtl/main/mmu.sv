@@ -61,9 +61,7 @@ module mmu
 	output  logic           host_rgo        ,
 	output  logic           host_wgo        ,
 
-    output  logic   [31:0]  mmio_wr_data    ,
-    output  logic   [63:0]  mmio_wr_addr    ,
-    output  logic           mmio_wr_en 
+    output  logic   [31:0]  mmio_rd_data    
 );
 
     logic [31:0] i_miss_addr, d_miss_addr;
@@ -157,19 +155,13 @@ module mmu
 
     always_ff@(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
-            mmio_wr_data = 0;
-            mmio_wr_addr = 0;
-            mmio_wr_en = 0;
+            mmio_rd_data = 0;
         end
         else if(d_wr & !(|d_addr[31:2])) begin
-            mmio_wr_data = d_wr_data;
-            mmio_wr_addr = {45'b0, 1'b1, d_addr[15:0], 2'b00};
-            mmio_wr_en = 1;         
+            mmio_rd_data = d_wr_data;      
         end
         else if(finish) begin
-            mmio_wr_data = cycle_count;
-            mmio_wr_addr = 64'h0010;
-            mmio_wr_en = 1; 
+            mmio_rd_data = {16'hF0F0, cycle_count};
         end
     end
 

@@ -258,9 +258,7 @@ module afu
 	    .host_we            (local_dma_we   ),
 	    .host_rgo           (rd_go          ),
 	    .host_wgo           (wr_go          ),   
-        .mmio_wr_data       (mmio.wr_data   ),
-        .mmio_wr_addr       (mmio.wr_addr   ),
-        .mmio_wr_en         (mmio.wr_en     )
+        .mmio_rd_data       (mmio.rd_data   )
     );
 
 
