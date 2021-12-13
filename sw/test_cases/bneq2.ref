@@ -1,0 +1,6 @@
+line 0     cmd: lbi r21 50                    binary/hex: 10101000000000001100100000110010 
+line 1     cmd: lbi r22 50                    binary/hex: 10110000000000001100100000110010 
+line 2     cmd: bneq r21 r22 2                binary/hex: 10110101010000000000100001110100 
+line 3     cmd: add r21 r0 r0                 binary/hex: 10101000000000000000000011011110 
+line 4     cmd: add r22 r0 r0                 binary/hex: 10110000000000000000000011011110 
+line 5     cmd: kill r0                       binary/hex: 00000000000000000000000000001100 

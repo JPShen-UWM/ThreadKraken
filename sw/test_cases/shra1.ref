@@ -1,0 +1,3 @@
+line 0     cmd: lbi r21 0xFFFF                binary/hex: 10101011111111111111110000110010 
+line 1     cmd: slbi r21 0xFFFF               binary/hex: 10101011111111111111110001010010 
+line 2     cmd: shra r22 r21 16               binary/hex: 10110101010000000100000010011000 

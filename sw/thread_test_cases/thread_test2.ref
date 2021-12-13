@@ -1,0 +1,34 @@
+line 0     cmd: lbi r19 1                     binary/hex: 10011000000000000000010000110010 
+line 1     cmd: slbi r19 0x0100               binary/hex: 10011000000001000000000001010010 
+line 2     cmd: addi r19 r19 26               binary/hex: 10011100110000000110100011011100 
+line 3     cmd: lbi r21 1                     binary/hex: 10101000000000000000010000110010 
+line 4     cmd: slbi r21 0x0400               binary/hex: 10101000000100000000000001010010 
+line 5     cmd: nt r26 r19 r21                binary/hex: 11010100111010100000000011101100 
+line 6     cmd: addi r21 r21 1                binary/hex: 10101101010000000000010011011100 
+line 7     cmd: nt r26 r19 r21                binary/hex: 11010100111010100000000011101100 
+line 8     cmd: addi r21 r21 1                binary/hex: 10101101010000000000010011011100 
+line 9     cmd: nt r26 r19 r21                binary/hex: 11010100111010100000000011101100 
+line 10    cmd: addi r21 r21 1                binary/hex: 10101101010000000000010011011100 
+line 11    cmd: nt r26 r19 r21                binary/hex: 11010100111010100000000011101100 
+line 12    cmd: addi r21 r21 1                binary/hex: 10101101010000000000010011011100 
+line 13    cmd: nt r26 r19 r21                binary/hex: 11010100111010100000000011101100 
+line 14    cmd: slp r1                        binary/hex: 00000000010000000000000010101100 
+line 15    cmd: ld r22 r21 0                  binary/hex: 10110101010000000000000111010000 
+line 16    cmd: beq r22 r0 -3                 binary/hex: 00000101101111111111010000110100 
+line 17    cmd: ld r22 r21 -1                 binary/hex: 10110101011111111111110111010000 
+line 18    cmd: beq r22 r0 -5                 binary/hex: 00000101101111111110110000110100 
+line 19    cmd: ld r22 r21 -2                 binary/hex: 10110101011111111111100111010000 
+line 20    cmd: beq r22 r0 -7                 binary/hex: 00000101101111111110010000110100 
+line 21    cmd: ld r22 r21 -3                 binary/hex: 10110101011111111111010111010000 
+line 22    cmd: beq r22 r0 -9                 binary/hex: 00000101101111111101110000110100 
+line 23    cmd: ld r22 r21 -4                 binary/hex: 10110101011111111111000111010000 
+line 24    cmd: beq r22 r0 -11                binary/hex: 00000101101111111101010000110100 
+line 25    cmd: kill r1                       binary/hex: 00000000010000000000000000001100 
+line 26    cmd: addi r6 r0 0                  binary/hex: 00110000000000000000000011011100 
+line 27    cmd: addi r26 r0 0                 binary/hex: 11010000000000000000000011011100 
+line 28    cmd: addi r26 r26 16               binary/hex: 11010110100000000100000011011100 
+line 29    cmd: addi r6 r6 1                  binary/hex: 00110001100000000000010011011100 
+line 30    cmd: bneq r6 r1 -3                 binary/hex: 00001001101111111111010001110100 
+line 31    cmd: st r4 r26 0                   binary/hex: 11010001000000000000000011010000 
+line 32    cmd: wk r0                         binary/hex: 00000000000000000000000001001100 
+line 33    cmd: kill r1                       binary/hex: 00000000010000000000000000001100 
