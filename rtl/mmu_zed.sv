@@ -1,11 +1,11 @@
 /*
- * Module name: mmu
+ * Module name: mmu_zed
  * Engineer: Jianping Shen
- * Description: Memory management unit.  
- * Dependency:i_cache.sv, d_cache.sv
- * Status: Developing
-**/
-module mmu
+ * Description: Memory management unit for zedboard
+ * Dependency:
+ * Status: Done
+ */
+module mmu_zed
 (
 	input                   clk             ,
 	input                   rst_n           ,
@@ -48,41 +48,40 @@ module mmu
     input                   trd_of          ,
     input                   trd_full        ,
 
-	input                   host_init       ,
-	input                   host_rd_ready   ,
-	input                   host_wr_ready   ,
-
-	input           [511:0] host_data_bus_read_in,
-	output  logic   [511:0] host_data_bus_write_out,
-
-    output  logic   [63:0]  cpu_addr        ,
-	output  logic           host_re         ,
-	output  logic           host_we         ,
-	output  logic           host_rgo        ,
-	output  logic           host_wgo        ,
-
-    output  logic   [31:0]  mmio_rd_data    
+    // Host interface
+    input           [31:0]  rd_data_0       ,
+    input           [31:0]  rd_data_1       ,
+    input           [31:0]  rd_data_2       ,
+    input           [31:0]  rd_data_3       ,
+    input           [31:0]  rd_data_4       ,
+    input           [31:0]  rd_data_5       ,
+    input           [31:0]  rd_data_6       ,
+    input           [31:0]  rd_data_7       ,
+    output  logic   [31:0]  host_rd_addr    ,
+    input           [1:0]   host_sig        ,
+    output  logic   [31:0]  uart_0          ,
+    output  logic   [31:0]  uart_1          ,
+    output  logic   [31:0]  uart_2          ,
+    output  logic   [31:0]  uart_3          ,
+    output  logic   [31:0]  cycle_count     ,
+    output  logic           finish
 );
 
-    logic [31:0] i_miss_addr, d_miss_addr;
-    logic i_rd_req, d_rd_req;
-    logic [511:0] host_rd_data;
-    logic [31:0] host_rd_addr;
-    logic uart_act;
+    logic [31:0] i_miss_addr;
+    logic i_rd_req;
 
-    assign uart_act = (d_wr|d_rd) & !(|d_addr[31:2]);
-
-    assign host_rd_data = host_data_bus_read_in;
-
-    logic [15:0] cycle_count;
     logic counting;
     logic not_miss, just_rd;
-    logic finish;
+    logic req_get, data_valid;
+    logic host_rd_valid;
+
+
     assign not_miss = just_rd & !i_miss;
+    assign req_get = host_sig[0];
+    assign data_valid = host_sig[1];
 
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
-            just_rd <= 0;
             cycle_count <= 0;
             counting <= 0;
             finish <= 0;
@@ -99,100 +98,61 @@ module mmu
         end
     end
 
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) just_rd <= 0;
+        else just_rd <= i_rd;
+    end
+
     typedef enum logic[1:0]
 	{
-		STARTUP,
-		READY,
-		IREAD,
-        DREAD
-	} sm_state;
-    sm_state state, nxt_state;
+		IDLE,
+		READ,
+		WAIT,
+        DONE
+	} state_t;
+    state_t state, nxt_state;
 
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n) state <= STARTUP;
+        if(!rst_n) state <= IDLE;
         else state <= nxt_state;
     end
 
     always_comb begin
         nxt_state = state;
-		host_re = 1'b0;
-		host_rgo = 1'b0;
-        cpu_addr = 64'b0;
         host_rd_addr = 0;
+        host_rd_valid = 0;
         case(state)
-            STARTUP: begin
-                if(host_init) nxt_state = READY;
+            IDLE: begin
+                if(i_rd_req) nxt_state = READ;
             end
-            READY: begin
-                if(i_rd_req) begin
-                    nxt_state = IREAD;
-                end
-                else if(d_rd_req) begin
-                    nxt_state = DREAD;
-                end
-            end
-            IREAD: begin
-                cpu_addr = {46'b0, i_miss_addr[15:0], 2'b00};
-                host_rgo = 1;
+            READ: begin
                 host_rd_addr = i_miss_addr;
-                if(host_rd_ready) begin
-                    nxt_state = READY;
-                    host_re = 1;
-                end
+                if(req_get) nxt_state = WAIT;
             end
-            DREAD: begin
-                cpu_addr = {46'b0, d_miss_addr[15:0], 2'b00};
-                host_rgo = 1;
-                host_rd_addr = d_miss_addr;
-                if(host_rd_ready) begin
-                    nxt_state = READY;
-                    host_re = 1;
-                end
+            WAIT: begin
+                if(data_valid) nxt_state = DONE;
+            end
+            DONE: begin
+                host_rd_valid = 1;
+                nxt_state = IDLE;
             end
         endcase
     end
 
-    assign host_data_bus_write_out = {448'h0, 32'h0, 16'h1020, cycle_count};
-/*
     always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
-            host_we <= 0;
-            host_wgo <= 0;
+            uart_0 <= 0;
+            uart_1 <= 0;
+            uart_2 <= 0;
+            uart_3 <= 0;
         end
-        else if(!running & counting) begin
-            host_wgo <= 1;
-        end
-        else if(host_wgo & host_wr_ready) begin
-            host_we <= 1;
-        end
-        else if(host_we) host_we <= 0;
-    end
-*/
-    always_ff @(posedge clk, negedge rst_n) begin   
-        if(!rst_n) begin
-            host_we <= 0;
-            host_wgo <= 0;
-        end
-        else if(host_wr_ready & host_wgo) begin
-            host_we <= 1;
-        end
-        else if(state == READY) host_wgo <= 1;
+        else if(d_addr == 0 & d_wr) uart_0 <= d_wr_data;
+        else if(d_addr == 1 & d_wr) uart_1 <= d_wr_data;
+        else if(d_addr == 2 & d_wr) uart_2 <= d_wr_data;
+        else if(d_addr == 3 & d_wr) uart_3 <= d_wr_data;
     end
 
-    always_ff@(posedge clk, negedge rst_n) begin
-        if(!rst_n) begin
-            mmio_rd_data <= 0;
-        end
-        else if(d_wr & !(|d_addr[31:2])) begin
-            mmio_rd_data <= d_wr_data;      
-        end
-        else if(finish) begin
-            mmio_rd_data <= {16'h3040, cycle_count};
-        end
-        else mmio_rd_data <= 32'hFFFFFFFF;
-    end
-
-    i_cache I_CACHE
+    i_cache_zed I_CACHE
     (
         .clk                (clk            ),
         .rst_n              (rst_n          ),
@@ -201,14 +161,21 @@ module mmu
         .i_miss             (i_miss         ),
         .i_rd_data          (i_rd_data      ),
         .i_segfault         (i_segfault     ),
-        .host_rd_ready      (host_rd_ready  ),
-        .host_rd_data       (host_rd_data   ),
-        .host_rd_addr       (host_rd_addr   ),
-        .i_miss_addr        (i_miss_addr    ),
+        .host_rd_valid      (host_rd_valid  ) ,
+        .rd_data_0          (rd_data_0      ) ,
+        .rd_data_1          (rd_data_1      ) ,
+        .rd_data_2          (rd_data_2      ) ,
+        .rd_data_3          (rd_data_3      ) ,
+        .rd_data_4          (rd_data_4      ) ,
+        .rd_data_5          (rd_data_5      ) ,
+        .rd_data_6          (rd_data_6      ) ,
+        .rd_data_7          (rd_data_7      ) ,
+        .host_rd_addr       (i_miss_addr    ) ,
+        .i_miss_addr        (i_miss_addr    ) ,
         .i_rd_req           (i_rd_req       )
     );
 
-    d_cache D_CACHE
+    d_cache_zed D_CACHE
     (
         .clk                (clk            ),
         .rst_n              (rst_n          ),
@@ -218,13 +185,7 @@ module mmu
         .d_wr_data          (d_wr_data      ),
         .d_miss             (d_miss         ),
         .d_rd_data          (d_rd_data      ),
-        .d_segfault         (d_segfault     ),
-        .host_rd_ready      (host_rd_ready  ),
-        .host_rd_data       (host_rd_data   ),
-        .host_rd_addr       (host_rd_addr   ),
-        .d_miss_addr        (d_miss_addr    ),
-        .d_rd_req           (d_rd_req       )
+        .d_segfault         (d_segfault     )
     );
-
 
 endmodule

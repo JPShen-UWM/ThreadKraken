@@ -16,4 +16,5 @@ kill r1 // exist
 
 // function 1 store thread id to return memory
 st r4, r1, 0
+st r1, r1, 0
 kill r1
