@@ -95,6 +95,7 @@ module mmu
         end
         else if(!running & counting) begin
             finish <= 1;
+            counting <= 0;
         end
     end
 
@@ -115,9 +116,7 @@ module mmu
     always_comb begin
         nxt_state = state;
 		host_re = 1'b0;
-		host_we = 1'b0;
 		host_rgo = 1'b0;
-		host_wgo = 1'b0;
         cpu_addr = 64'b0;
         host_rd_addr = 0;
         case(state)
@@ -153,6 +152,22 @@ module mmu
         endcase
     end
 
+    assign host_data_bus_write_out <= {32'h0, 16'h1020, cycle_count};
+    
+    alwasy_ff @(posedge clk, negedge rst_n) begin
+        if(!rst_n) begin
+            host_we <= 0;
+            host_wgo <= 0;
+        end
+        else if(!running & counting) begin
+            host_wgo <= 1;
+        end
+        else if(host_wgo & host_wr_ready) begin
+            host_we <= 1;
+        end
+        else if(host_we) host_we <= 0;
+    end
+
     always_ff@(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
             mmio_rd_data <= 0;
@@ -161,7 +176,7 @@ module mmu
             mmio_rd_data <= d_wr_data;      
         end
         else if(finish) begin
-            mmio_rd_data <= {16'hF0F0, cycle_count};
+            mmio_rd_data <= {16'h3040, cycle_count};
         end
     end
 
