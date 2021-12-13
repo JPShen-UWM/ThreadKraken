@@ -6,6 +6,7 @@
 #
 
 from assembler import Assembler
+from simulator import Simulator
 import os
 import sys
 
@@ -18,6 +19,16 @@ def compile(files, folder_name):
 				asm.setBinaryFormat(True)
 				asm.setReadableOutput(True)
 				asm.compile(folder_name + file, folder_name + file[:-4]+'.ref')
+				# asm = Assembler()
+				# asm.char = True
+				# asm.compile(folder_name + file, folder_name + file[:-4]+'.txt')
+
+def simulate(folder_name):
+	s = Simulator()
+	s.run(folder_name + '/beq1.asm')
+	print(s.threads[0].regs)
+	print(s.mem)
+
 
 if __name__ == '__main__':
 	cur_path = os.getcwd()
@@ -34,5 +45,7 @@ if __name__ == '__main__':
 	else:
 		compile(simple_cases, './test_cases/')
 		compile(thread_cases, './thread_test_cases/')
+
+	# simulate('./test_cases/')
 
 	

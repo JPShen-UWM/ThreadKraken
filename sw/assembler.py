@@ -6,7 +6,7 @@
 # -h: human read format, debug use
 # -o: specify output file name, otherwise: output.o
 import sys
-import collections
+import binascii
 import re
 
 #arithmetic extension s to n bit
@@ -501,6 +501,7 @@ class Assembler:
         self.programStack = []
         self.manRead = False
         self.binaryFormat = False
+        self.char = False
 
     def setOffset(self, addr):
         self.ADDR_OFFSET = addr
@@ -514,7 +515,8 @@ class Assembler:
     def compile(self, inFilename, outFilename='./output.o'):
         print("compile %s" %inFilename)
         self.firstRoundProcessing(inFilename)
-
+        if outFilename == None:
+          outFilename = './output.o'
         self.processProgram(outFilename)
         print("Compile complete")
 
@@ -539,6 +541,7 @@ class Assembler:
         return
 
     def processProgram(self, filename):
+
         with open(filename, 'w') as outfile:
           for line in self.programStack:
             binaryCmd = self.processCmd(line)
@@ -548,6 +551,16 @@ class Assembler:
               outfile.write('line %s cmd: %s binary/hex: %s \n' %(str(line[0]).ljust(5), line[1].ljust(29), binaryCmd))
             outfile.flush()
           outfile.close()
+        
+        ## compile for fpga input
+        if self.manRead and self.binaryFormat:
+          with open(filename[:-4]+'.bin', 'wb') as outfile:
+            for line in self.programStack:
+              binaryCmd = self.processCmd(line)
+              outfile.write(int(binaryCmd,2).to_bytes(4,'little',signed = False))
+              
+            outfile.close()
+        
         return
 
     def processCmd(self, cmd):
@@ -593,5 +606,6 @@ if __name__ == "__main__":
       asm.setBinaryFormat(True)
     if '-o' in sys.argv:
       outFilename = sys.argv[sys.argv.index('-o') + 1]
+
     asm.compile(sys.argv[1], outFilename)
-    print('labels used: {asm.labels}')
+  
