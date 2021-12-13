@@ -152,9 +152,9 @@ module mmu
         endcase
     end
 
-    assign host_data_bus_write_out <= {32'h0, 16'h1020, cycle_count};
-    
-    alwasy_ff @(posedge clk, negedge rst_n) begin
+    assign host_data_bus_write_out = {32'h0, 16'h1020, cycle_count};
+
+    always_ff @(posedge clk, negedge rst_n) begin
         if(!rst_n) begin
             host_we <= 0;
             host_wgo <= 0;
