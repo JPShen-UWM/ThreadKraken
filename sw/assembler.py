@@ -546,7 +546,7 @@ class Assembler:
           for line in self.programStack:
             binaryCmd = self.processCmd(line)
             if not self.manRead:
-              outfile.write(binaryCmd + ',\n')
+              outfile.write('0x' + binaryCmd + ',\n')
             else:
               outfile.write('line %s cmd: %s binary/hex: %s \n' %(str(line[0]).ljust(5), line[1].ljust(29), binaryCmd))
             outfile.flush()
