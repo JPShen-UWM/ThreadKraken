@@ -553,11 +553,12 @@ class Assembler:
           outfile.close()
         
         ## compile for fpga input
-        if self.manRead and self.binaryFormat:
-          with open(filename[:-4]+'.bin', 'wb') as outfile:
+        if not self.manRead:
+          with open(filename[:-2]+'.bin', 'w') as outfile:
             for line in self.programStack:
               binaryCmd = self.processCmd(line)
-              outfile.write(int(binaryCmd,2).to_bytes(4,'little',signed = False))
+              # outfile.write(int(binaryCmd,2).to_bytes(4,'little',signed = False))
+              outfile.write(binaryCmd + '\n')
               
             outfile.close()
         
