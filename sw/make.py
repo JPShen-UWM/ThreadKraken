@@ -34,6 +34,7 @@ if __name__ == '__main__':
 	cur_path = os.getcwd()
 	simple_cases = os.listdir(cur_path + '/test_cases')
 	thread_cases = os.listdir(cur_path + '/thread_test_cases')
+	demo_cases = os.listdir(cur_path + '/Demo')
 	
 	if 'clean' in sys.argv:
 		for file in simple_cases:
@@ -42,9 +43,13 @@ if __name__ == '__main__':
 		for file in thread_cases:
 			if '.asm' not in file:
 				os.remove('./thread_test_cases/'+file)
+		for file in demo_cases:
+			if '.asm' not in file:
+				os.remove('./Demo/'+file)
 	else:
 		compile(simple_cases, './test_cases/')
 		compile(thread_cases, './thread_test_cases/')
+		compile(demo_cases, './Demo/')
 
 	# simulate('./test_cases/')
 

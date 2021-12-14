@@ -45,9 +45,9 @@ addi r26 r0 0
 .loop
 adda r26 r26 r1 
 
-ld r10 r25 0
-add r10 r10 r1 
-st r25 r10 0
+lda r10 r25 0
+adda r10 r10 r1 
+sta r25 r10 0
 
 addi r6 r6 -1 // Increment r6 by 1
 bneq r6 r0 .loop

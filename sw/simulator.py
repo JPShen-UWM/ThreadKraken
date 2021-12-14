@@ -495,9 +495,9 @@ class Simulator:
       while findSlot(self.threads) != -1: # while still can find thread
         next = find_next_thrd(self.last_exe_thrd_idx, self.threads)
         if not next: 
-          for t in self.threads:
-            if t:
-              print(f'Thread ID: {t.id}, thread state: {t.state}')
+          # for t in self.threads:
+          #   if t:
+          #     print(f'Thread ID: {t.id}, thread state: {t.state}')
           break
         
         else: # it's this threads turn
@@ -505,13 +505,8 @@ class Simulator:
           
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
-        # if cur_thrd.regs[6] == 0:
-        #   print(cur_thrd.pc)
-          # print(self.instr[cur_thrd.pc])
-        # print(cur_thrd.regs[6])
-        # print(f'Thread ID: {cur_thrd.id}, thread reg 4: {cur_thrd.regs[4]}')
-        # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
-      # print( findSlot)
+
+        print(cur_thrd)
       return
 
     def execute_on_thread(self, thrd):
@@ -581,7 +576,7 @@ class Thread:
       self.state = RUNNABLE
 
       self.regs[1] = id
-      self.regs[ESP] = int(stack_mapping[id],16)
+      # self.regs[ESP] = int(stack_mapping[id],16)
       self.stack_bot = int(stack_mapping[id],16) - int('0xFF',16) if self.id != 0 else int(stack_mapping[id],16) - int('0x1FF',16)
 
     def create(self, id):
@@ -600,14 +595,21 @@ class Thread:
 
 
     def __str__(self):
-      str = '*'*40 + '\n'
-      str += f'Thread ID  :   {self.id}\n'
-      str += f'Current PC :   {self.pc}\n'
-      str += f'parent thrd:   {self.parent}\n'
-      str += f'child thrd :   {self.children}\n'
-      str += f'Thread State:  {self.state}\n'
-      str += f'stack: {self.stack}'
-      str += f'*'*40
+      regs = 'regs: '
+      for i,reg in enumerate(self.regs):
+        if reg != 0:
+          regs += f'r{i}: {hex(self.regs[i])} '
+      
+      # str = '*'*40 + '\n'
+      
+      str = f'tid: {self.id} '
+      str += f'PC: {self.pc} '
+      # str += f'parent thrd:   {self.parent}\n'
+      # str += f'child thrd :   {self.children}\n'
+      str += f'T state:  {self.state} '
+      # str += f'stack: {self.stack}'
+      str += regs
+      # str += f'*'*40
       return str
 
   
@@ -620,6 +622,7 @@ if __name__ == '__main__':
     exit()
   else:
     s.run(sys.argv[1])
+    print('*'*30 + 'mem' + '*'*30)
     if '-h' in sys.argv:
       for item in s.mem:
         print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))} -> chars: {hexToString(hex(int(s.mem[item],2)))}')
