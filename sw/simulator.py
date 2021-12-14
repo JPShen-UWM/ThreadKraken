@@ -493,7 +493,7 @@ class Simulator:
           
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
-        print(cur_thrd)
+        # print(cur_thrd)
         # print(f'Thread ID: {cur_thrd.id}, thread reg 4: {cur_thrd.regs[4]}')
         # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
       # print( findSlot)
@@ -506,7 +506,7 @@ class Simulator:
         thrd.pc -= str_to_int("0x10100")
         cmd = self.instr[thrd.pc]
       
-      print(cmd.lower())
+      # print(cmd.lower())
 
       args = re.split(',| ', cmd)
       opcode= args[0].lower()
@@ -523,9 +523,6 @@ class Simulator:
           self._wk(thrd, cmd.lower())
         else:
           self._kill(thrd, cmd.lower())
-        for t in self.threads:
-            if t:
-              print(f'Thread ID: {t.id}, thread state: {t.state}')
         
 
       else:
@@ -547,7 +544,8 @@ class Simulator:
         
       thrd.pc += 1
       if thrd.pc >= len(self.instr):
-        thrd.die()
+        if thrd.pc - str_to_int("0x10100") < 0:
+          thrd.die()
         return
       if atomic: self.execute_on_thread(thrd)
       return 
@@ -607,7 +605,9 @@ if __name__ == '__main__':
     exit()
   else:
     s.run(sys.argv[1])
-  print(s.mem)
+  for item in s.mem:
+
+    print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))}')
 
   
 
