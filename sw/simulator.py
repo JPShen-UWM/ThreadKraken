@@ -17,6 +17,12 @@ def findSlot(pool):
       return i
   return -1
 
+def hexToString(str):
+  hexstr= str[2:]
+  bytesObject = bytes.fromhex(hexstr)
+  asciistr = bytesObject.decode("ASCII")
+  return asciistr
+
 def find_next_thrd(last, pool):
   for i in range(last+1,8):
     if pool[i] and pool[i].state == RUNNABLE:
@@ -300,7 +306,13 @@ class Simulator:
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
 
       rd, ra  = int(rd[1:]), int(ra[1:])
-      imm = str_to_int(imm) # can be neg
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
 
       # print(f'jalr before: imm in int: {imm}, ra: {thrd.regs[ra]}, curPC: {thrd.pc}')
       thrd.regs[rd] = thrd.pc + 1
@@ -379,7 +391,7 @@ class Simulator:
       newID = findSlot(self.threads)
       if newID == -1: raise Exception('Number of Threads is 8, can not add more!')
 
-      self.threads[newID] = Thread(newID, parent.regs[ra], parent.stack, parent.regs, parent.id)
+      self.threads[newID] = Thread(newID, parent.regs[ra], parent.stack, [0]*32, parent.id)
       parent.children.append(newID)
 
       # rd = new Thread's ID
@@ -493,7 +505,10 @@ class Simulator:
           
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
-        # print(cur_thrd)
+        # if cur_thrd.regs[6] == 0:
+        #   print(cur_thrd.pc)
+          # print(self.instr[cur_thrd.pc])
+        # print(cur_thrd.regs[6])
         # print(f'Thread ID: {cur_thrd.id}, thread reg 4: {cur_thrd.regs[4]}')
         # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
       # print( findSlot)
@@ -605,10 +620,12 @@ if __name__ == '__main__':
     exit()
   else:
     s.run(sys.argv[1])
-  for item in s.mem:
-
-    print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))}')
-
+    if '-h' in sys.argv:
+      for item in s.mem:
+        print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))} -> chars: {hexToString(hex(int(s.mem[item],2)))}')
+    else:
+      for item in s.mem:
+        print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))}')
   
 
 
