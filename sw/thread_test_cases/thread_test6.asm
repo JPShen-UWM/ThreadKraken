@@ -1,8 +1,8 @@
 lbi r19 1 // working
 slbi r19 0x0100 // r19 is at start pc
 addi r19 r19 13 // r19 is pointing to function 1
-lbi r21 0x0004
-slbi r21 0x0000
+lbi r21 0x0000
+slbi r21 0x0040
 nt r26 r19 r21
 slp r1
 addi r0 r0 0
