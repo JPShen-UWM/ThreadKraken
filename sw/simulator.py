@@ -461,6 +461,7 @@ class Simulator:
       self.instr = []
       self.labels = {}
       self.last_exe_thrd_idx = -1
+      self.print_cycle = False
 
     def run(self, file_name):
       self.load_instr(file_name)
@@ -505,8 +506,8 @@ class Simulator:
           
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
-
-        print(cur_thrd)
+        if self.print_cycle:
+          print(cur_thrd)
       return
 
     def execute_on_thread(self, thrd):
@@ -621,6 +622,8 @@ if __name__ == '__main__':
     print("Provide asm input")
     exit()
   else:
+    if '-c' in sys.argv:
+      s.print_cycle = True
     s.run(sys.argv[1])
     print('*'*30 + 'mem' + '*'*30)
     if '-h' in sys.argv:
