@@ -2,8 +2,8 @@
 lbi r21 50
 lbi r22 20
 beq r21 r22 2
-add r21 r0 r0
-add r22 r0 r0
+addi r21 r0 0xFE
+addi r22 r0 0X01
 
 #should not jump to here
 kill r0

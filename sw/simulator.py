@@ -1,5 +1,5 @@
 import copy
-import re
+import re, sys
 import collections
 from assembler import imm_to_bin, bindigits
 
@@ -16,6 +16,12 @@ def findSlot(pool):
     if slot == 0 or slot.state == IDLE:
       return i
   return -1
+
+def hexToString(str):
+  hexstr= str[2:]
+  bytesObject = bytes.fromhex(hexstr)
+  asciistr = bytesObject.decode("ASCII")
+  return asciistr
 
 def find_next_thrd(last, pool):
   for i in range(last+1,8):
@@ -300,7 +306,13 @@ class Simulator:
       [_, rd, ra, imm] = [_ for _ in args if len(_) > 0]
 
       rd, ra  = int(rd[1:]), int(ra[1:])
-      imm = str_to_int(imm) # can be neg
+      if imm in labels:
+        # print(f'jal label: {imm}: {labels[imm]}')
+        diff = labels[imm] - thrd.pc - 1
+        # print('labels[imm]: %d - curPC: %d = %s'%(labels[imm], curPC, imm))
+        imm = diff
+      else:
+        imm = str_to_int(imm) # can be neg
 
       # print(f'jalr before: imm in int: {imm}, ra: {thrd.regs[ra]}, curPC: {thrd.pc}')
       thrd.regs[rd] = thrd.pc + 1
@@ -379,14 +391,14 @@ class Simulator:
       newID = findSlot(self.threads)
       if newID == -1: raise Exception('Number of Threads is 8, can not add more!')
 
-      self.threads[newID] = Thread(newID, parent.regs[ra], parent.stack, parent.regs, parent.id)
+      self.threads[newID] = Thread(newID, parent.regs[ra], parent.stack, [0]*32, parent.id)
       parent.children.append(newID)
 
       # rd = new Thread's ID
       parent.regs[rd] = newID
 
-      # new Thread's r8 = rb
-      self.threads[newID].regs[8] = parent.regs[rb]
+      # new Thread's r4 = rb
+      self.threads[newID].regs[4] = parent.regs[rb]
       return
 
     def _slp(self, thrd, cmd):
@@ -403,6 +415,7 @@ class Simulator:
 
       rd = int(rd[1:])
       self.threads[thrd.regs[rd]].state = RUNNABLE
+      # print('state: ', self.threads[thrd.regs[rd]].state)
       return
 
     def _kill(self, thrd, cmd):
@@ -448,6 +461,7 @@ class Simulator:
       self.instr = []
       self.labels = {}
       self.last_exe_thrd_idx = -1
+      self.print_cycle = False
 
     def run(self, file_name):
       self.load_instr(file_name)
@@ -474,14 +488,17 @@ class Simulator:
             self.instr.append(cmd[:cmd.find('/')].strip())
           else:
             self.instr.append(cmd)
-            self.counter += 1
+          self.counter += 1
       return
 
     def execute_program(self):
       #loop until no thread exists
-      while findSlot(self.threads) != -1: 
+      while findSlot(self.threads) != -1: # while still can find thread
         next = find_next_thrd(self.last_exe_thrd_idx, self.threads)
         if not next: 
+          # for t in self.threads:
+          #   if t:
+          #     print(f'Thread ID: {t.id}, thread state: {t.state}')
           break
         
         else: # it's this threads turn
@@ -489,14 +506,18 @@ class Simulator:
           
           self.execute_on_thread(cur_thrd)
           self.last_exe_thrd_idx = indx
-        
-        print(cur_thrd)
-        # tmp = [bindigits(_,32) for _ in cur_thrd.regs]
-        # print(tmp)
+        if self.print_cycle:
+          print(cur_thrd)
       return
 
     def execute_on_thread(self, thrd):
-      cmd = self.instr[thrd.pc]
+      try:
+        cmd = self.instr[thrd.pc]
+      except:
+        thrd.pc -= str_to_int("0x10100")
+        cmd = self.instr[thrd.pc]
+      
+      # print(cmd.lower())
 
       args = re.split(',| ', cmd)
       opcode= args[0].lower()
@@ -504,9 +525,17 @@ class Simulator:
       
       
       # print('pc %d -> cmd %s' %(cmd[0], opcode))
-      if opcode in ['nt', ' slp', 'wl', 'kill']:
+      if opcode in ['nt', 'slp', 'wk', 'kill']:
         if opcode == 'nt':
           self._nt(thrd, cmd.lower())
+        elif opcode == 'slp':
+          self._slp(thrd, cmd.lower())
+        elif opcode == 'wk':
+          self._wk(thrd, cmd.lower())
+        else:
+          self._kill(thrd, cmd.lower())
+        
+
       else:
         if opcode[-1] == 'a' and opcode[:-1] in Simulator.cmd_table:
           if opcode[:-1] in ['jal', 'jalr', 'beq', 'bneq', 'blt']: # check if labels are used
@@ -520,11 +549,14 @@ class Simulator:
           else:
             Simulator.func_map[opcode](thrd, cmd.lower(), self.mem)
       
-      print(cmd.lower())
-
+      # print('***********')
+      # if thrd.id == 0:
+      #   print('the thread 0 pc: ',  + thrd.pc)
+        
       thrd.pc += 1
       if thrd.pc >= len(self.instr):
-        thrd.die()
+        if thrd.pc - str_to_int("0x10100") < 0:
+          thrd.die()
         return
       if atomic: self.execute_on_thread(thrd)
       return 
@@ -543,7 +575,9 @@ class Thread:
       self.parent = parent
       self.children = []
       self.state = RUNNABLE
-      self.regs[ESP] = int(stack_mapping[id],16)
+
+      self.regs[1] = id
+      # self.regs[ESP] = int(stack_mapping[id],16)
       self.stack_bot = int(stack_mapping[id],16) - int('0xFF',16) if self.id != 0 else int(stack_mapping[id],16) - int('0x1FF',16)
 
     def create(self, id):
@@ -562,13 +596,21 @@ class Thread:
 
 
     def __str__(self):
-      str = '*'*40 + '\n'
-      str += f'Thread ID  :   {self.id}\n'
-      str += f'Current PC :   {self.pc}\n'
-      str += f'parent thrd:   {self.parent}\n'
-      str += f'child thrd :   {self.children}\n'
-      str += f'stack: {self.stack}'
-      str += f'*'*40
+      regs = 'regs: '
+      for i,reg in enumerate(self.regs):
+        if reg != 0:
+          regs += f'r{i}: {hex(self.regs[i])} '
+      
+      # str = '*'*40 + '\n'
+      
+      str = f'tid: {self.id} '
+      str += f'PC: {self.pc} '
+      # str += f'parent thrd:   {self.parent}\n'
+      # str += f'child thrd :   {self.children}\n'
+      str += f'T state:  {self.state} '
+      # str += f'stack: {self.stack}'
+      str += regs
+      # str += f'*'*40
       return str
 
   
@@ -576,24 +618,20 @@ class Thread:
 if __name__ == '__main__':
   print('Welcome to ThreadKraken Simulator')
   s = Simulator()
-  s.run('./test_cases/test_input.asm')
-
-  a = int('0xFFFFF0FF',16)
-  b = int('0x0FFFFFF0',16)
-  # print(a)
-  # print(a<b)
-  # print(twos_comp_less_than(a,b))
-  # b = 7
-  # print(hex(a),hex(b))
-  # a = bindigits(a,32)
-  # b = bindigits(b,32)
-  # c = full_adder(a, b)
-  
-  # print('a:', a)
-  # print('b:', b)
-  # print('c:', c)
-  # print(imm_to_bin('248', 32,1))
-  # print( len(c))
+  if len(sys.argv) < 2:
+    print("Provide asm input")
+    exit()
+  else:
+    if '-c' in sys.argv:
+      s.print_cycle = True
+    s.run(sys.argv[1])
+    print('*'*30 + 'mem' + '*'*30)
+    if '-h' in sys.argv:
+      for item in s.mem:
+        print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))} -> chars: {hexToString(hex(int(s.mem[item],2)))}')
+    else:
+      for item in s.mem:
+        print(f'{hex(int(item,2))}: {hex(int(s.mem[item],2))}')
   
 
 
