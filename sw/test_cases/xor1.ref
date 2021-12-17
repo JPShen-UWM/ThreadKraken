@@ -1,4 +1,0 @@
-line 0     cmd: lbi r21 0xF0                  binary/hex: 10101000000000111100000000110010 
-line 1     cmd: lbi r22 0x0F                  binary/hex: 10110000000000000011110000110010 
-line 2     cmd: xor r23 r21 r22               binary/hex: 10111101011011000000000001111110 
-line 3     cmd: kill r0                       binary/hex: 00000000000000000000000000001100 

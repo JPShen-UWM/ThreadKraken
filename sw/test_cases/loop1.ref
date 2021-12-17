@@ -1,8 +1,0 @@
-line 0     cmd: lbi r21 0xFF                  binary/hex: 10101000000000111111110000110010 
-line 1     cmd: lbi r22 0x1                   binary/hex: 10110000000000000000010000110010 
-line 2     cmd: lbi r2 0                      binary/hex: 00010000000000000000000000110010 
-line 3     cmd: lbi r3 5                      binary/hex: 00011000000000000001010000110010 
-line 4     cmd: add r23 r21 r22               binary/hex: 10111101011011000000000011011110 
-line 5     cmd: addi r2 r2 1                  binary/hex: 00010000100000000000010011011100 
-line 6     cmd: bneq r2 r3 .start             binary/hex: 00011000101111111111010001110100 
-line 7     cmd: kill r1                       binary/hex: 00000000010000000000000000001100 

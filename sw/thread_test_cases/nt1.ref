@@ -1,6 +1,0 @@
-line 0     cmd: lbi r3 0                      binary/hex: 00011000000000000000000000110010 
-line 1     cmd: jal r2 0                      binary/hex: 00010000000000000000000000010100 
-line 2     cmd: addi r2 r2 2                  binary/hex: 00010000100000000000100011011100 
-line 3     cmd: nt r4 r2 r3                   binary/hex: 00100000100001100000000011101100 
-line 4     cmd: addi r3 r3 1                  binary/hex: 00011000110000000000010011011100 
-line 5     cmd: kill r1                       binary/hex: 00000000010000000000000000001100 

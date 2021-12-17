@@ -1,17 +1,13 @@
-lbi r19 1 // working
-slbi r19 0x0100 // r19 is at start pc
-addi r19 r19 13 // r19 is pointing to function 1
-lbi r21 0x0004
-slbi r21 0x0000
-nt r26 r19 r21
-slp r1
-addi r0 r0 0
-st r0 r21 0
-st r0 r19 1
-st r0 r26 2
-st r0 r21 3
-kill r0
-addi r4 r4 -1
-bneq r0 r4 -2
-wk r0
+addi r6 r0 256 // load r0 its thread id
+addi r6 r6 256 // load r0 its thread id
+addi r6 r6 256 // load r0 its thread id
+addi r6 r6 256 // load r0 its thread id
+addi r6 r6 256 // load r0 its thread id
+lbi r5 1
+slbi r5 0x400
+ld r26 r5 0
+addi r26 r26 1 // loop
+addi r6 r6 -1 // Increment r6 by 1
+st r5 r26 0
+bneq r6 r0 -5
 kill r1

@@ -1,5 +1,0 @@
-line 0     cmd: addi r21 r0 0xFF              binary/hex: 10101000000000111111110011011100 
-line 1     cmd: jal r20 2                     binary/hex: 10100000000000000000100000010100 
-line 2     cmd: addi r22 r0 0x1               binary/hex: 10110000000000000000010011011100 
-line 3     cmd: add r23 r21 r22               binary/hex: 10111101011011000000000011011110 
-line 4     cmd: kill r0                       binary/hex: 00000000000000000000000000001100 

@@ -1,9 +1,0 @@
-line 0     cmd: lbi r22, 100                  binary/hex: 10110000000000011001000000110010 
-line 1     cmd: lbi r23, 99                   binary/hex: 10111000000000011000110000110010 
-line 2     cmd: add r24, r22, r23             binary/hex: 11000101101011100000000011011110 
-line 3     cmd: add r23, r24, r22             binary/hex: 10111110001011000000000011011110 
-line 4     cmd: add r25, r22, r23             binary/hex: 11001101101011100000000011011110 
-line 5     cmd: add r26, r23, r22             binary/hex: 11010101111011000000000011011110 
-line 6     cmd: add r27, r22, r25             binary/hex: 11011101101100100000000011011110 
-line 7     cmd: add r25, r27, r22             binary/hex: 11001110111011000000000011011110 
-line 8     cmd: kill r1                       binary/hex: 00000000010000000000000000001100 

@@ -24,11 +24,14 @@ beqa r22 r0 -9
 lda r22 r21 -4
 beqa r22 r0 -11
 kill r1 // exist // function 1 do add five ten times and store thread id to return memory ------------------
-addi r6 r0 1024 // load r0 its thread id
+addi r6 r0 256 // load r0 its thread id
 addi r26 r0 0
+addi r5 r4 0x20
+ld r26 r5 0
 add r26 r26 r1 // loop
 addi r6 r6 -1 // Increment r6 by 1
-bneq r6 r0 -3
+st r5 r26 0
+bneq r6 r0 -5
 st r4 r26 0
 wk r0
 kill r1  // return
