@@ -52,7 +52,20 @@ module mem(
     assign d_wr_data = exe_data_mem;
     
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n | flushMEM) begin
+        if(!rst_n) begin
+            ins_wb      <= 0;
+            pc_wb       <= 0;
+            exe_data_wb <= 0;
+            trd_wb      <= 0;
+            reg_wr_wb   <= 0;
+            wr_en_wb    <= 0;
+            trd_ctrl_wb <= 0;
+            obj_trd_wb  <= 0;
+            wb_sel_wb   <= 0;
+            new_pc_wb   <= 0;
+            new_data_wb <= 0;
+        end
+		  else if(flushMEM) begin
             ins_wb      <= 0;
             pc_wb       <= 0;
             exe_data_wb <= 0;
