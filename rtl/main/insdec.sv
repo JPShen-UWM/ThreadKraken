@@ -104,7 +104,7 @@ module insdec
 
     // dec/exe pipeline
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n | flushID) begin
+        if(!rst_n) begin
             pc_exe          <= 0;
             ins_exe         <= 0;
             reg_rd_a_exe    <= 0;
@@ -120,6 +120,22 @@ module insdec
             i_type_exe      <= 0;
             trd_exe         <= 0;
         end
+		  else if(flushID) begin
+		      pc_exe          <= 0;
+            ins_exe         <= 0;
+            reg_rd_a_exe    <= 0;
+            reg_rd_b_exe    <= 0;
+            reg_wr_exe      <= 0;
+            imm_exe         <= 0;
+            wr_en_exe       <= 0;
+            alu_op_exe      <= 0;
+            mem_ctrl_exe    <= 0;
+            trd_ctrl_exe    <= 0;
+            jmp_con_exe     <= 0;
+            wb_sel_exe      <= 0;
+            i_type_exe      <= 0;
+            trd_exe         <= 0;
+		  end
         else if(!stall) begin
             trd_exe         <= trd_dec;
             pc_exe          <= pc_dec;

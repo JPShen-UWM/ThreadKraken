@@ -121,7 +121,37 @@ module exe(
     );
 
     always_ff @(posedge clk, negedge rst_n) begin
-        if(!rst_n | flushEX | stall) begin
+        if(!rst_n) begin
+            addr_mem    <= 0;
+            ins_mem     <= 0;
+            pc_mem      <= 0;
+            exe_data_mem<= 0;
+            trd_mem     <= 0;
+            reg_wr_mem  <= 0;
+            wr_en_mem   <= 0;
+            wb_sel_mem  <= 0;
+            mem_ctrl_mem<= 0;
+            trd_ctrl_mem<= 0;
+            obj_trd_mem <= 0;
+            new_pc_mem  <= 0;
+            new_data_mem<= 0;
+        end
+		  else if(flushEX) begin
+            addr_mem    <= 0;
+            ins_mem     <= 0;
+            pc_mem      <= 0;
+            exe_data_mem<= 0;
+            trd_mem     <= 0;
+            reg_wr_mem  <= 0;
+            wr_en_mem   <= 0;
+            wb_sel_mem  <= 0;
+            mem_ctrl_mem<= 0;
+            trd_ctrl_mem<= 0;
+            obj_trd_mem <= 0;
+            new_pc_mem  <= 0;
+            new_data_mem<= 0;
+        end
+		  else if(stall) begin
             addr_mem    <= 0;
             ins_mem     <= 0;
             pc_mem      <= 0;
